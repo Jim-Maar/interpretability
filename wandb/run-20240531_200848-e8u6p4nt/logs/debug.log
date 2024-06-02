@@ -1,0 +1,34 @@
+2024-05-31 20:08:48,661 INFO    MainThread:1256761 [wandb_setup.py:_flush():68] Configure stats pid to 1256761
+2024-05-31 20:08:48,661 INFO    MainThread:1256761 [wandb_setup.py:_flush():68] Loading settings from /hpi/fs00/home/jim.maar/.config/wandb/settings
+2024-05-31 20:08:48,661 INFO    MainThread:1256761 [wandb_setup.py:_flush():68] Loading settings from /hpi/fs00/home/jim.maar/interpretability/wandb/settings
+2024-05-31 20:08:48,661 INFO    MainThread:1256761 [wandb_setup.py:_flush():68] Loading settings from environment variables: {'_require_service': 'True'}
+2024-05-31 20:08:48,661 INFO    MainThread:1256761 [wandb_setup.py:_flush():68] Inferring run settings from compute environment: {'program_relpath': 'training_probes.py', 'program': '/hpi/fs00/home/jim.maar/interpretability/training_probes.py'}
+2024-05-31 20:08:48,661 INFO    MainThread:1256761 [wandb_init.py:_log_setup():492] Logging user logs to /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_200848-e8u6p4nt/logs/debug.log
+2024-05-31 20:08:48,661 INFO    MainThread:1256761 [wandb_init.py:_log_setup():493] Logging internal logs to /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_200848-e8u6p4nt/logs/debug-internal.log
+2024-05-31 20:08:48,661 INFO    MainThread:1256761 [wandb_init.py:init():532] calling init triggers
+2024-05-31 20:08:48,662 INFO    MainThread:1256761 [wandb_init.py:init():538] wandb.init called with sweep_config: {}
+config: {'layer': 6, 'pos_start': 5, 'pos_end': 54, 'length': 49, 'alternating': tensor([ 1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,
+         1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,
+         1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1], device='cuda:0'), 'options': 2, 'rows': 8, 'cols': 8, 'max_epochs': 8, 'num_games_train': 30000, 'num_games_val': 10000, 'num_games_test': 10000, 'batch_size': 256, 'lr': 0.0001, 'betas': (0.9, 0.99), 'wd': 0.01, 'probe_name': 'even_odd_flipped_L6', 'wandb_project': 'Othello-GPT-Probes-real-test', 'modes': 3, 'get_state_stack_one_hot': <function get_state_stack_one_hot_even_odd_flipped at 0x7f5063742d40>, 'relevant_mode': 0}
+2024-05-31 20:08:48,662 INFO    MainThread:1256761 [wandb_init.py:init():588] starting backend
+2024-05-31 20:08:48,662 INFO    MainThread:1256761 [wandb_init.py:init():592] setting up manager
+2024-05-31 20:08:48,667 INFO    MainThread:1256761 [backend.py:_multiprocessing_setup():106] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2024-05-31 20:08:48,668 INFO    MainThread:1256761 [wandb_init.py:init():599] backend started and connected
+2024-05-31 20:08:48,670 INFO    MainThread:1256761 [wandb_init.py:init():687] updated telemetry
+2024-05-31 20:08:48,675 INFO    MainThread:1256761 [wandb_init.py:init():727] communicating run to backend with 60.0 second timeout
+2024-05-31 20:08:50,027 INFO    MainThread:1256761 [wandb_run.py:_on_init():2134] communicating current version
+2024-05-31 20:08:50,115 INFO    MainThread:1256761 [wandb_run.py:_on_init():2143] got version response upgrade_message: "wandb version 0.17.0 is available!  To upgrade, please run:\n $ pip install wandb --upgrade"
+
+2024-05-31 20:08:50,115 INFO    MainThread:1256761 [wandb_init.py:init():775] starting run threads in backend
+2024-05-31 20:08:56,194 INFO    MainThread:1256761 [wandb_run.py:_console_start():2114] atexit reg
+2024-05-31 20:08:56,194 INFO    MainThread:1256761 [wandb_run.py:_redirect():1969] redirect: 3
+2024-05-31 20:08:56,194 INFO    MainThread:1256761 [wandb_run.py:_redirect():2034] Wrapping output streams.
+2024-05-31 20:08:56,194 INFO    MainThread:1256761 [wandb_run.py:_redirect():2059] Redirects installed.
+2024-05-31 20:08:56,195 INFO    MainThread:1256761 [wandb_init.py:init():817] run started, returning control to user process
+2024-05-31 20:17:39,977 INFO    MainThread:1256761 [wandb_run.py:_finish():1854] finishing run feedback2code/Othello-GPT-Probes-real-test/e8u6p4nt
+2024-05-31 20:17:39,980 INFO    MainThread:1256761 [wandb_run.py:_atexit_cleanup():2083] got exitcode: 0
+2024-05-31 20:17:39,980 INFO    MainThread:1256761 [wandb_run.py:_restore():2066] restore
+2024-05-31 20:17:39,980 INFO    MainThread:1256761 [wandb_run.py:_restore():2072] restore done
+2024-05-31 20:17:44,703 INFO    MainThread:1256761 [wandb_run.py:_footer_history_summary_info():3442] rendering history
+2024-05-31 20:17:44,704 INFO    MainThread:1256761 [wandb_run.py:_footer_history_summary_info():3474] rendering summary
+2024-05-31 20:17:44,706 INFO    MainThread:1256761 [wandb_run.py:_footer_sync_info():3398] logging synced files

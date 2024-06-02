@@ -1,0 +1,1 @@
+{"train_loss_even": 78.59356689453125, "train_loss_odd": 79.18692016601562, "train_loss_all": 86.51603698730469, "train_loss": 244.29652404785156, "_timestamp": 1717170843.3642735, "_runtime": 431.8369565010071, "_step": 702, "val_loss": 243.82810974121094, "_wandb": {"runtime": 431}}
