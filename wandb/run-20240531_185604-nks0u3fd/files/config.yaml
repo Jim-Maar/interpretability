@@ -1,0 +1,103 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.13.10
+    framework: huggingface
+    huggingface_version: 4.41.2
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.11.9
+    start_time: 1717174564.614401
+    t:
+      1:
+      - 1
+      - 11
+      - 49
+      - 51
+      - 55
+      - 71
+      2:
+      - 1
+      - 11
+      - 49
+      - 51
+      - 55
+      - 71
+      3:
+      - 2
+      - 13
+      - 16
+      - 23
+      4: 3.11.9
+      5: 0.13.10
+      6: 4.41.2
+      8:
+      - 5
+alternating:
+  desc: null
+  value: "[ 1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1\n\
+    \  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1\n  1]"
+batch_size:
+  desc: null
+  value: 256
+betas:
+  desc: null
+  value:
+  - 0.9
+  - 0.99
+cols:
+  desc: null
+  value: 8
+get_state_stack_one_hot:
+  desc: null
+  value: __main__.get_state_stack_one_hot_num_flipped
+layer:
+  desc: null
+  value: 6
+length:
+  desc: null
+  value: 49
+lr:
+  desc: null
+  value: 0.0001
+max_epochs:
+  desc: null
+  value: 8
+modes:
+  desc: null
+  value: 3
+num_games_test:
+  desc: null
+  value: 10000
+num_games_train:
+  desc: null
+  value: 30000
+num_games_val:
+  desc: null
+  value: 10000
+options:
+  desc: null
+  value: 18
+pos_end:
+  desc: null
+  value: 54
+pos_start:
+  desc: null
+  value: 5
+probe_name:
+  desc: null
+  value: num_flipped_L6
+relevant_mode:
+  desc: null
+  value: 0
+rows:
+  desc: null
+  value: 8
+wandb_project:
+  desc: null
+  value: Othello-GPT-Probes-real-test
+wd:
+  desc: null
+  value: 0.01

@@ -1,0 +1,1059 @@
+/hpi/fs00/home/jim.maar/miniconda3/envs/othello-env/lib/python3.11/site-packages/accelerate/utils/imports.py:274: UserWarning: `ACCELERATE_DISABLE_RICH` is deprecated and will be removed in v0.22.0 and deactivated by default. Please use `ACCELERATE_ENABLE_RICH` if you wish to use `rich`.
+  warnings.warn(
+wandb: Currently logged in as: jim-maar (feedback2code). Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_175830-4i6fg13x
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run num_flipped_L0
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/4i6fg13x
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: 
+wandb: Run history:
+wandb:      train_loss ███▇▇▇▆▆▆▆▅▅▅▅▄▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁
+wandb:  train_loss_all ███▇▇▇▆▆▆▆▅▅▅▅▅▄▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▁▁▁▁▁▁
+wandb: train_loss_even ██▇▇▇▇▆▆▆▆▅▅▅▅▄▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁
+wandb:  train_loss_odd ██▇▇▇▇▆▆▆▆▅▅▅▅▄▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁
+wandb:        val_loss █▆▅▄▃▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 196.89928
+wandb:  train_loss_all 70.21205
+wandb: train_loss_even 63.19761
+wandb:  train_loss_odd 63.48962
+wandb:        val_loss 195.8255
+wandb: 
+wandb: 🚀 View run num_flipped_L0 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/4i6fg13x
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_175830-4i6fg13x/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_180803-vahfjccj
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run num_flipped_L1
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/vahfjccj
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: \ 0.027 MB of 0.040 MB uploaded (0.000 MB deduped)wandb: | 0.027 MB of 0.040 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:      train_loss ██▇▇▇▆▆▆▅▅▅▅▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all ██▇▇▇▆▆▆▅▅▅▅▄▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁
+wandb: train_loss_even ██▇▇▇▆▆▆▅▅▅▅▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd ██▇▇▇▆▆▆▅▅▅▅▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▆▅▃▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 159.97963
+wandb:  train_loss_all 56.72723
+wandb: train_loss_even 51.79773
+wandb:  train_loss_odd 51.45467
+wandb:        val_loss 159.92108
+wandb: 
+wandb: 🚀 View run num_flipped_L1 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/vahfjccj
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_180803-vahfjccj/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_181737-rgg4vhm2
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run num_flipped_L2
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/rgg4vhm2
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: \ 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: | 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: / 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:      train_loss ██▇▇▆▆▆▅▅▅▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all ██▇▇▆▆▆▅▅▅▄▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even ██▇▇▆▆▆▅▅▅▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd ██▇▇▆▆▆▅▅▅▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▆▄▃▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 145.76807
+wandb:  train_loss_all 51.52151
+wandb: train_loss_even 47.40593
+wandb:  train_loss_odd 46.84063
+wandb:        val_loss 145.77852
+wandb: 
+wandb: 🚀 View run num_flipped_L2 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/rgg4vhm2
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_181737-rgg4vhm2/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_182713-3auzi75a
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run num_flipped_L3
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/3auzi75a
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: \ 0.027 MB of 0.041 MB uploaded (0.000 MB deduped)wandb: | 0.027 MB of 0.041 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:      train_loss ██▇▇▆▆▅▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all ██▇▇▆▆▅▅▅▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even ██▇▇▆▆▅▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd ██▇▇▆▆▅▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▆▄▃▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 136.06348
+wandb:  train_loss_all 48.16327
+wandb: train_loss_even 44.11885
+wandb:  train_loss_odd 43.78136
+wandb:        val_loss 136.29793
+wandb: 
+wandb: 🚀 View run num_flipped_L3 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/3auzi75a
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_182713-3auzi75a/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_183649-c1chzj1x
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run num_flipped_L4
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/c1chzj1x
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: \ 0.027 MB of 0.041 MB uploaded (0.000 MB deduped)wandb: | 0.027 MB of 0.041 MB uploaded (0.000 MB deduped)wandb: / 0.027 MB of 0.041 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:      train_loss ██▇▆▆▅▅▅▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all ██▇▆▆▅▅▅▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even ██▇▆▆▅▅▅▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd ██▇▇▆▆▅▅▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▄▃▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 127.27692
+wandb:  train_loss_all 45.11374
+wandb: train_loss_even 41.11997
+wandb:  train_loss_odd 41.04321
+wandb:        val_loss 128.2242
+wandb: 
+wandb: 🚀 View run num_flipped_L4 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/c1chzj1x
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_183649-c1chzj1x/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: | Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_184629-il46abae
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run num_flipped_L5
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/il46abae
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: \ 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: | 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:      train_loss ██▇▆▆▅▅▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all ██▇▆▆▅▅▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even ██▇▆▆▅▅▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd ██▇▆▆▅▅▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▃▂▂▁▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 123.51668
+wandb:  train_loss_all 43.41288
+wandb: train_loss_even 40.03653
+wandb:  train_loss_odd 40.06726
+wandb:        val_loss 122.62244
+wandb: 
+wandb: 🚀 View run num_flipped_L5 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/il46abae
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_184629-il46abae/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_185604-nks0u3fd
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run num_flipped_L6
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/nks0u3fd
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: 
+wandb: Run history:
+wandb:      train_loss █▇▆▅▅▄▃▃▃▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all █▇▆▅▅▄▃▃▃▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▇▆▅▅▄▃▃▃▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▇▆▅▅▄▄▃▃▃▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▄▃▂▂▁▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 120.26233
+wandb:  train_loss_all 41.79701
+wandb: train_loss_even 39.1599
+wandb:  train_loss_odd 39.30541
+wandb:        val_loss 121.13287
+wandb: 
+wandb: 🚀 View run num_flipped_L6 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/nks0u3fd
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_185604-nks0u3fd/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_190538-66i7ur90
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run num_flipped_L7
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/66i7ur90
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: \ 0.027 MB of 0.041 MB uploaded (0.000 MB deduped)wandb: | 0.027 MB of 0.041 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:      train_loss █▇▆▅▄▃▃▃▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all █▇▆▅▄▃▃▃▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▇▆▅▄▃▃▃▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▇▆▅▄▃▃▃▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▄▃▂▂▁▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 124.78893
+wandb:  train_loss_all 43.02049
+wandb: train_loss_even 40.9563
+wandb:  train_loss_odd 40.81214
+wandb:        val_loss 124.88912
+wandb: 
+wandb: 🚀 View run num_flipped_L7 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/66i7ur90
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_190538-66i7ur90/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_191512-ivpxqw59
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run even_odd_flipped_L0
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/ivpxqw59
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.027 MB of 0.041 MB uploaded (0.000 MB deduped)wandb: \ 0.027 MB of 0.041 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:      train_loss ██▇▇▆▆▅▅▅▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all ██▇▇▆▆▅▅▅▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even ██▇▆▆▆▅▅▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd ██▇▆▆▆▅▅▅▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▆▄▃▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 66.32763
+wandb:  train_loss_all 22.80336
+wandb: train_loss_even 21.69176
+wandb:  train_loss_odd 21.83251
+wandb:        val_loss 66.29581
+wandb: 
+wandb: 🚀 View run even_odd_flipped_L0 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/ivpxqw59
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_191512-ivpxqw59/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_192407-rzs8dp7r
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run even_odd_flipped_L1
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/rzs8dp7r
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: 
+wandb: Run history:
+wandb:      train_loss █▇▇▆▆▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all ██▇▆▆▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▇▇▆▆▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▇▇▆▆▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▄▃▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 60.80598
+wandb:  train_loss_all 21.34158
+wandb: train_loss_even 19.7168
+wandb:  train_loss_odd 19.7476
+wandb:        val_loss 61.0192
+wandb: 
+wandb: 🚀 View run even_odd_flipped_L1 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/rzs8dp7r
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_192407-rzs8dp7r/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_193304-d8sgnz3z
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run even_odd_flipped_L2
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/d8sgnz3z
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: 
+wandb: Run history:
+wandb:      train_loss █▇▇▆▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all █▇▇▆▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▇▇▆▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▇▇▆▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▄▃▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 57.96767
+wandb:  train_loss_all 20.7947
+wandb: train_loss_even 18.5701
+wandb:  train_loss_odd 18.60286
+wandb:        val_loss 58.10942
+wandb: 
+wandb: 🚀 View run even_odd_flipped_L2 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/d8sgnz3z
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_193304-d8sgnz3z/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_194201-jxtgnkn6
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run even_odd_flipped_L3
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/jxtgnkn6
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: \ 0.027 MB of 0.040 MB uploaded (0.000 MB deduped)wandb: | 0.027 MB of 0.040 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:      train_loss █▇▆▆▅▅▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all █▇▆▆▅▅▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▇▆▆▅▅▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▇▆▆▅▅▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▃▃▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 56.75087
+wandb:  train_loss_all 20.52419
+wandb: train_loss_even 18.15639
+wandb:  train_loss_odd 18.0703
+wandb:        val_loss 56.20148
+wandb: 
+wandb: 🚀 View run even_odd_flipped_L3 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/jxtgnkn6
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_194201-jxtgnkn6/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_195056-y3uzmzqc
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run even_odd_flipped_L4
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/y3uzmzqc
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: \ 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: | 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: / 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:      train_loss █▇▆▅▅▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all █▇▆▅▅▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▇▆▆▅▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▇▆▅▅▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▃▂▂▁▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 55.17988
+wandb:  train_loss_all 20.26226
+wandb: train_loss_even 17.47575
+wandb:  train_loss_odd 17.44187
+wandb:        val_loss 55.0022
+wandb: 
+wandb: 🚀 View run even_odd_flipped_L4 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/y3uzmzqc
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_195056-y3uzmzqc/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_195952-3cywscaz
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run even_odd_flipped_L5
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/3cywscaz
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: \ 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: | 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: / 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:      train_loss █▇▆▅▅▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all █▇▆▅▅▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▇▆▅▅▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▇▆▅▅▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▃▂▂▁▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 54.97083
+wandb:  train_loss_all 20.34484
+wandb: train_loss_even 17.31082
+wandb:  train_loss_odd 17.31517
+wandb:        val_loss 54.78951
+wandb: 
+wandb: 🚀 View run even_odd_flipped_L5 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/3cywscaz
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_195952-3cywscaz/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_200848-e8u6p4nt
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run even_odd_flipped_L6
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/e8u6p4nt
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: 
+wandb: Run history:
+wandb:      train_loss █▇▅▅▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all █▇▅▄▄▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▇▅▅▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▇▆▅▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▃▂▂▁▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 56.31369
+wandb:  train_loss_all 20.82189
+wandb: train_loss_even 17.74228
+wandb:  train_loss_odd 17.74952
+wandb:        val_loss 56.61261
+wandb: 
+wandb: 🚀 View run even_odd_flipped_L6 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/e8u6p4nt
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_200848-e8u6p4nt/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_201744-34hjvaq1
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run even_odd_flipped_L7
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/34hjvaq1
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: 
+wandb: Run history:
+wandb:      train_loss █▇▅▄▄▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all █▇▅▄▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▇▅▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▇▅▄▄▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▃▃▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 57.90313
+wandb:  train_loss_all 21.21099
+wandb: train_loss_even 18.35004
+wandb:  train_loss_odd 18.3421
+wandb:        val_loss 57.94217
+wandb: 
+wandb: 🚀 View run even_odd_flipped_L7 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/34hjvaq1
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_201744-34hjvaq1/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_202642-exk9hwes
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run flipped_L0
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/exk9hwes
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: \ 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:      train_loss ██▇▇▆▆▆▅▅▅▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all ██▇▇▆▆▆▅▅▅▅▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even ██▇▇▆▆▅▅▅▅▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd ██▇▇▆▆▅▅▅▅▄▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▆▄▃▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 19.80144
+wandb:  train_loss_all 7.32325
+wandb: train_loss_even 6.24975
+wandb:  train_loss_odd 6.22844
+wandb:        val_loss 19.84597
+wandb: 
+wandb: 🚀 View run flipped_L0 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/exk9hwes
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_202642-exk9hwes/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_203509-topa9a8z
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run flipped_L1
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/topa9a8z
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: 
+wandb: Run history:
+wandb:      train_loss ██▇▆▆▅▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all ██▇▆▆▆▅▅▄▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even ██▇▆▆▅▅▅▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd ██▇▆▆▅▅▅▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▄▃▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 12.62039
+wandb:  train_loss_all 4.65421
+wandb: train_loss_even 4.0564
+wandb:  train_loss_odd 3.90978
+wandb:        val_loss 12.63118
+wandb: 
+wandb: 🚀 View run flipped_L1 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/topa9a8z
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_203509-topa9a8z/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_204335-bsgkll59
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run flipped_L2
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/bsgkll59
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: 
+wandb: Run history:
+wandb:      train_loss █▇▇▆▆▅▅▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all █▇▇▆▆▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▇▇▆▆▅▅▄▄▄▃▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▇▇▆▆▅▅▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▄▃▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 9.68875
+wandb:  train_loss_all 3.62445
+wandb: train_loss_even 3.11887
+wandb:  train_loss_odd 2.94543
+wandb:        val_loss 9.47735
+wandb: 
+wandb: 🚀 View run flipped_L2 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/bsgkll59
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_204335-bsgkll59/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_205203-hdpqytax
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run flipped_L3
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/hdpqytax
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: \ 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: | 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: / 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:      train_loss █▇▇▆▅▅▄▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all █▇▇▆▅▅▅▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▇▇▆▅▅▄▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▇▇▆▅▅▄▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▄▃▂▁▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 7.77067
+wandb:  train_loss_all 2.82801
+wandb: train_loss_even 2.50791
+wandb:  train_loss_odd 2.43476
+wandb:        val_loss 7.82104
+wandb: 
+wandb: 🚀 View run flipped_L3 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/hdpqytax
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_205203-hdpqytax/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_210033-6r2yqeya
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run flipped_L4
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/6r2yqeya
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: \ 0.027 MB of 0.041 MB uploaded (0.000 MB deduped)wandb: | 0.027 MB of 0.041 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:      train_loss █▇▆▆▅▅▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all █▇▆▆▅▅▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▇▆▆▅▅▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▇▆▆▅▅▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▃▂▂▁▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 7.05764
+wandb:  train_loss_all 2.61915
+wandb: train_loss_even 2.25779
+wandb:  train_loss_odd 2.1807
+wandb:        val_loss 6.77916
+wandb: 
+wandb: 🚀 View run flipped_L4 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/6r2yqeya
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_210033-6r2yqeya/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_210900-xlcixh80
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run flipped_L5
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/xlcixh80
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: 
+wandb: Run history:
+wandb:      train_loss █▇▆▅▅▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all █▇▆▅▅▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▇▆▅▅▄▄▃▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▇▆▅▅▄▄▄▃▃▃▃▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▃▂▂▁▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 6.59451
+wandb:  train_loss_all 2.28307
+wandb: train_loss_even 2.16799
+wandb:  train_loss_odd 2.14346
+wandb:        val_loss 6.67814
+wandb: 
+wandb: 🚀 View run flipped_L5 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/xlcixh80
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_210900-xlcixh80/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_211728-ujhj3rnc
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run flipped_L6
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/ujhj3rnc
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.027 MB of 0.027 MB uploaded (0.000 MB deduped)wandb: \ 0.027 MB of 0.041 MB uploaded (0.000 MB deduped)wandb: | 0.027 MB of 0.041 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:      train_loss █▇▅▄▄▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all █▇▅▄▄▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▇▅▄▄▃▃▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▇▅▄▄▃▃▃▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▄▃▃▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 7.45058
+wandb:  train_loss_all 2.43183
+wandb: train_loss_even 2.48941
+wandb:  train_loss_odd 2.52934
+wandb:        val_loss 7.50757
+wandb: 
+wandb: 🚀 View run flipped_L6 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/ujhj3rnc
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_211728-ujhj3rnc/logs
+Probe Trained and Saved
+wandb: - Waiting for wandb.init()...wandb: \ Waiting for wandb.init()...wandb: wandb version 0.17.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240531_212558-l62347ur
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run flipped_L7
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/l62347ur
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+  0%|          | 0/117 [00:00<?, ?it/s]
+  0%|          | 0/39 [00:00<?, ?it/s]
+wandb: Waiting for W&B process to finish... (success).
+wandb: 
+wandb: Run history:
+wandb:      train_loss █▆▅▄▃▃▂▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_all █▆▅▄▃▃▂▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: train_loss_even █▆▅▄▃▃▂▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:  train_loss_odd █▆▅▄▃▃▂▂▂▂▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb:        val_loss █▅▄▃▂▂▁▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 8.70496
+wandb:  train_loss_all 2.79293
+wandb: train_loss_even 3.02322
+wandb:  train_loss_odd 2.88881
+wandb:        val_loss 8.62975
+wandb: 
+wandb: 🚀 View run flipped_L7 at: https://wandb.ai/feedback2code/Othello-GPT-Probes-real-test/runs/l62347ur
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240531_212558-l62347ur/logs
+Probe Trained and Saved
