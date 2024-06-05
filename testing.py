@@ -1,4 +1,6 @@
-import torch
+
+
+"""import torch
 import einops
 
 # Sample tensors with the specified requires_grad properties
@@ -18,4 +20,4 @@ probe_out = einops.einsum(
 )
 
 # Check requires_grad
-print(probe_out.requires_grad)  # Should print True
+print(probe_out.requires_grad)  # Should print True"""
