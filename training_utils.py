@@ -41,8 +41,6 @@ from utils import seq_to_state_stack
 
 device = t.device("cuda" if t.cuda.is_available() else "cpu")
 
-t.set_grad_enabled(False)
-
 MAIN = __name__ == "__main__"
 
 model = utils.load_model(device)

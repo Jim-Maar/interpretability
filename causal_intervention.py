@@ -42,8 +42,6 @@ from training_utils import get_state_stack_one_hot_flipped, get_state_stack_one_
 
 device = t.device("cuda" if t.cuda.is_available() else "cpu")
 
-t.set_grad_enabled(False)
-
 MAIN = __name__ == "__main__"
 
 model = utils.load_model(device)
