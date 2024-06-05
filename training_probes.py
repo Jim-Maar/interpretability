@@ -59,7 +59,7 @@ OTHELLO_MECHINT_ROOT = (OTHELLO_ROOT / "mechanistic_interpretability").resolve()
 
 sys.path.append(str(OTHELLO_MECHINT_ROOT))
 
-DEBUG = True
+DEBUG = False
 if DEBUG:
     DATASET = "small"
 else:
@@ -117,7 +117,7 @@ class ProbeTrainingArgs():
     # Standard training hyperparams
     max_epochs: int = 1
     if DATASET == "small":
-        num_games_train: int = 50000
+        num_games_train: int = 6
         num_games_val: int = 0
         num_games_test: int = 0
     else:
@@ -148,7 +148,8 @@ class ProbeTrainingArgs():
     get_state_stack_one_hot = None
     relevant_mode = 2
 
-    # training 
+    # training
+    has_bias = False
     
 
     # Code to get randomly initialized probe
@@ -159,6 +160,13 @@ class ProbeTrainingArgs():
         linear_probe.requires_grad = True
         return linear_probe
 
+    def setup_bias(self, model: HookedTransformer):
+        bias = t.randn(
+            self.modes, self.rows, self.cols, self.options, requires_grad=False, device=device
+        ) / np.sqrt(model.cfg.d_model)
+        bias.requires_grad = True
+        return bias
+
 
 # set torch seed to 42
 t.manual_seed(42)
@@ -168,6 +176,8 @@ class LinearProbeTrainer:
         self.model = model
         self.args = args
         self.linear_probe = args.setup_linear_probe(model)
+        if args.has_bias:
+            self.bias = args.setup_bias(model)
 
     def training_step(self, indices: Int[Tensor, "game_idx"], train_or_val="train") -> t.Tensor:
 
@@ -201,24 +211,13 @@ class LinearProbeTrainer:
             )
             resid_post = cache["resid_post", self.args.layer][:, self.args.pos_start: self.args.pos_end]
 
-        # modes = self.linear_probe.shape[0]
-        # resid_post = einops.repeat(resid_post, 'batch pos d_model -> modes batch pos 8 8 options d_model', modes=modes, options=options)
-        # linear_probe_new = einops.repeat(self.linear_probe, 'modes d_model rows cols options -> modes batch 49 rows cols options d_model', batch=batch_size)
-        # probe_out = resid_post * linear_probe_new
-        # probe_out = probe_out.sum(dim=-1)
         probe_out = einops.einsum(
             resid_post,
             self.linear_probe,
             "batch pos d_model, modes d_model rows cols options -> modes batch pos rows cols options",
         )
-        '''probe_out = t.einsum(
-            "bpd,mdrco->mbprco",
-            resid_post,
-            self.linear_probe,
-        )'''
-        # resid_post_reshaped = resid_post.unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
-        # result = resid_post_reshaped * self.linear_probe.unsqueeze(1).unsqueeze(2)
-        # probe_out = result.sum(dim=3)
+        if self.args.has_bias:
+            probe_out += einops.rearrange(self.bias, 'modes rows cols options -> modes 1 1 rows cols options')
 
         probe_log_probs = probe_out.log_softmax(-1)
         probe_correct_log_probs = einops.reduce(
@@ -262,9 +261,13 @@ class LinearProbeTrainer:
     def save_linear_probe(self, path):
         t.save(self.linear_probe, path)
 
+    def save_bias(self, path):
+        assert(self.args.has_bias)
+        t.save(self.bias, path)
+
 
     def train(self):
-
+        print(f"Training Probe: {self.args.full_probe_name}")
         self.step = 0
         # wandb.login(key=os.environ["WANDB_API_KEY"])
         if not DEBUG:
@@ -298,13 +301,15 @@ class LinearProbeTrainer:
         if not DEBUG:
             wandb.finish()
         self.save_linear_probe(f"models2/{args.full_probe_name}.pth")
+        if args.has_bias:
+            self.save_bias(f"models2/{args.full_probe_name}_bias.pth")
         print("Probe Trained and Saved")
 
 if __name__ == "__main__":
     # TODO: Add Probes for the other 5 Probes
     # TODO: Change position of where first and last part are removed
     # TODO: Use big dataset instead of small dataset
-    for probe in ["mine_theirs_first_tile", "black_white_first_tile", "num_flipped", "even_odd_flipped", "flipped"]:
+    for probe in ["mine_theirs_first_tile", "num_flipped_with_bias", "even_odd_flipped", "num_flipped", "flipped", "black_white_first_tile"]:
         for layer in range(8):
             args = ProbeTrainingArgs()
             args.layer = layer
@@ -320,6 +325,11 @@ if __name__ == "__main__":
                 args.get_state_stack_one_hot = get_state_stack_one_hot_num_flipped
                 args.options = 18
                 args.relevant_mode = 0
+            elif probe == "num_flipped_with_bias":
+                args.get_state_stack_one_hot = get_state_stack_one_hot_num_flipped
+                args.options = 18
+                args.relevant_mode = 0
+                args.has_bias = True
             elif probe == "even_odd_flipped":
                 args.get_state_stack_one_hot = get_state_stack_one_hot_even_odd_flipped
                 args.options = 2
