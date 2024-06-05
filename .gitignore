@@ -1,6 +1,9 @@
 data
 wandb
-slurm#
+slurm
 other
 models
-__pycache
+models2
+__pycache__
+run.sh
+slurmout.log
