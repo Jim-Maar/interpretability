@@ -1,1 +1,6 @@
 data
+wandb
+slurm#
+other
+models
+__pycache
