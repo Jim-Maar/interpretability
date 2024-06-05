@@ -35,14 +35,17 @@ import transformer_lens
 import utils
 from transformer_lens.hook_points import HookedRootModule, HookPoint
 from transformer_lens import HookedTransformer, HookedTransformerConfig, FactoredMatrix, ActivationCache
+import dataclasses
+from dataclasses import dataclass
+
+from tqdm import tqdm
 
 import wandb
 
-from training_utils import get_state_stack_one_hot_flipped, get_state_stack_one_hot_num_flipped, get_state_stack_one_hot_even_odd_flipped
+from training_utils import get_state_stack_one_hot_flipped, get_state_stack_one_hot_num_flipped, get_state_stack_one_hot_even_odd_flipped, get_state_stack_one_hot_first_tile_places_black_white, get_state_stack_one_hot_first_tile_places_mine_theirs
 
 device = t.device("cuda" if t.cuda.is_available() else "cpu")
-
-t.set_grad_enabled(False)
+print(f"device: {device}")
 
 MAIN = __name__ == "__main__"
 
@@ -56,10 +59,34 @@ OTHELLO_MECHINT_ROOT = (OTHELLO_ROOT / "mechanistic_interpretability").resolve()
 
 sys.path.append(str(OTHELLO_MECHINT_ROOT))
 
-# Load board data as ints (i.e. 0 to 60)
-board_seqs_int = t.tensor(np.load(OTHELLO_MECHINT_ROOT / "board_seqs_int_small.npy"), dtype=t.long)
-# Load board data as "strings" (i.e. 0 to 63 with middle squares skipped out)
-board_seqs_string = t.tensor(np.load(OTHELLO_MECHINT_ROOT / "board_seqs_string_small.npy"), dtype=t.long)
+DEBUG = True
+if DEBUG:
+    DATASET = "small"
+else:
+    DATASET = "big"
+
+if DATASET == "small":
+    # Load board data as ints (i.e. 0 to 60)
+    board_seqs_int = t.tensor(np.load(OTHELLO_MECHINT_ROOT / "board_seqs_int_small.npy"), dtype=t.long)
+    # Load board data as "strings" (i.e. 0 to 63 with middle squares skipped out)
+    board_seqs_string = t.tensor(np.load(OTHELLO_MECHINT_ROOT / "board_seqs_string_small.npy"), dtype=t.long)
+elif DATASET == "big":
+    # Load board data as ints (i.e. 0 to 60)
+    board_seqs_int = t.load(
+        os.path.join(
+            section_dir,
+            "data/board_seqs_int_train.pth",
+        )
+    )
+    # Load board data as "strings" (i.e. 0 to 63 with middle squares skipped out)
+    board_seqs_string = t.load(
+        os.path.join(
+            section_dir,
+            "data/board_seqs_string_train.pth",
+        )
+    )
+else:
+    raise ValueError("Invalid DATASET")
 
 assert all([middle_sq not in board_seqs_string for middle_sq in [27, 28, 35, 36]])
 assert board_seqs_int.max() == 60
@@ -88,19 +115,28 @@ class ProbeTrainingArgs():
     cols: int = 8
 
     # Standard training hyperparams
-    max_epochs: int = 8
-    num_games_train: int = 30000
-    num_games_val: int = 10000
-    num_games_test: int = 10000
+    max_epochs: int = 1
+    if DATASET == "small":
+        num_games_train: int = 50000
+        num_games_val: int = 0
+        num_games_test: int = 0
+    else:
+        num_games_train: int = 3500000
+        num_games_val: int = 0
+        num_games_test: int = 0
 
     # Hyperparams for optimizer
-    batch_size: int = 256
+    if DEBUG:
+        batch_size: int = 2
+    else:
+        batch_size: int = 256
     lr: float = 1e-4
     betas: Tuple[float, float] = (0.9, 0.99)
     wd: float = 0.01
 
     # Misc.
     probe_name: str = "main_linear_probe"
+    full_probe_name: str = "main_linear_probe_L6"
 
     # The modes are "black to play / odd moves", "white to play / even moves", and "all moves"
     modes = 3
@@ -111,6 +147,8 @@ class ProbeTrainingArgs():
     # probe_kind
     get_state_stack_one_hot = None
     relevant_mode = 2
+
+    # training 
     
 
     # Code to get randomly initialized probe
@@ -142,7 +180,9 @@ class LinearProbeTrainer:
         game_len = self.args.length
         options = self.args.options
 
-        state_stack_one_hot = args.get_state_stack_one_hot(games_str, self.args).to(device)
+        state_stack_one_hot = args.get_state_stack_one_hot(games_str).to(device)
+        assert state_stack_one_hot.shape == (batch_size, 60, 8, 8, options)
+        state_stack_one_hot = state_stack_one_hot[:, args.pos_start:args.pos_end, :, :, :]
 
         # games_int = tensor of game sequences, each of length 60
         # This is the input to our model
@@ -161,11 +201,24 @@ class LinearProbeTrainer:
             )
             resid_post = cache["resid_post", self.args.layer][:, self.args.pos_start: self.args.pos_end]
 
+        # modes = self.linear_probe.shape[0]
+        # resid_post = einops.repeat(resid_post, 'batch pos d_model -> modes batch pos 8 8 options d_model', modes=modes, options=options)
+        # linear_probe_new = einops.repeat(self.linear_probe, 'modes d_model rows cols options -> modes batch 49 rows cols options d_model', batch=batch_size)
+        # probe_out = resid_post * linear_probe_new
+        # probe_out = probe_out.sum(dim=-1)
         probe_out = einops.einsum(
             resid_post,
             self.linear_probe,
             "batch pos d_model, modes d_model rows cols options -> modes batch pos rows cols options",
         )
+        '''probe_out = t.einsum(
+            "bpd,mdrco->mbprco",
+            resid_post,
+            self.linear_probe,
+        )'''
+        # resid_post_reshaped = resid_post.unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
+        # result = resid_post_reshaped * self.linear_probe.unsqueeze(1).unsqueeze(2)
+        # probe_out = result.sum(dim=3)
 
         probe_log_probs = probe_out.log_softmax(-1)
         probe_correct_log_probs = einops.reduce(
@@ -178,9 +231,9 @@ class LinearProbeTrainer:
         loss_all = -probe_correct_log_probs[2, :].mean(0).sum()
         loss = loss_even + loss_odd + loss_all
 
-        if train_or_val == "train":
+        if train_or_val == "train" and self.step % 10 == 0 and not DEBUG:
             wandb.log({f"{train_or_val}_loss_even": loss_even.item(), f"{train_or_val}_loss_odd": loss_odd.item(), f"{train_or_val}_loss_all": loss_all.item(), f"{train_or_val}_loss": loss.item()}, step=self.step)
-            self.step += 1
+        self.step += 1
 
         return loss
         
@@ -214,8 +267,9 @@ class LinearProbeTrainer:
 
         self.step = 0
         # wandb.login(key=os.environ["WANDB_API_KEY"])
-        wandb.login()
-        wandb.init(project=args.wandb_project, name=args.probe_name, config=args)
+        if not DEBUG:
+            wandb.login()
+            wandb.init(project=args.wandb_project, name=args.full_probe_name, config=args)
 
         optimizer = t.optim.AdamW([self.linear_probe], lr=self.args.lr, betas=self.args.betas, weight_decay=self.args.wd)
 
@@ -229,7 +283,7 @@ class LinearProbeTrainer:
                 optimizer.zero_grad()
                 progress_bar_train.set_description(f"Train_Loss = {loss:.4f}")
 
-            val_loss = 0
+            '''val_loss = 0
             count = 0
             full_val_indices = trainer.shuffle_val_indices()
             progress_bar_val = tqdm(full_val_indices)
@@ -239,20 +293,24 @@ class LinearProbeTrainer:
                     val_loss += trainer.training_step(indices, "val")
                     progress_bar_val.set_description(f"Test_Loss = {loss:.4f}")
             
-            wandb.log({"val_loss": val_loss / count}, step=self.step)
+            wandb.log({"val_loss": val_loss / count}, step=self.step)'''
 
-        wandb.finish()
-        self.save_linear_probe(f"models/{args.probe_name}.pth")
+        if not DEBUG:
+            wandb.finish()
+        self.save_linear_probe(f"models2/{args.full_probe_name}.pth")
         print("Probe Trained and Saved")
 
 if __name__ == "__main__":
     # TODO: Add Probes for the other 5 Probes
-    for probe in ["num_flipped", "even_odd_flipped", "flipped"]:
+    # TODO: Change position of where first and last part are removed
+    # TODO: Use big dataset instead of small dataset
+    for probe in ["mine_theirs_first_tile", "black_white_first_tile", "num_flipped", "even_odd_flipped", "flipped"]:
         for layer in range(8):
             args = ProbeTrainingArgs()
             args.layer = layer
-            args.wandb_project = "Othello-GPT-Probes-real-test"
-            args.probe_name = f"{probe}_L{layer}"
+            args.wandb_project = "Othello-GPT-Probes"
+            args.probe_name = probe
+            args.full_probe_name = f"{probe}_L{layer}"
             args.modes = 3
             if probe == "flipped":
                 args.get_state_stack_one_hot = get_state_stack_one_hot_flipped
@@ -265,6 +323,14 @@ if __name__ == "__main__":
             elif probe == "even_odd_flipped":
                 args.get_state_stack_one_hot = get_state_stack_one_hot_even_odd_flipped
                 args.options = 2
+                args.relevant_mode = 0
+            elif probe == "black_white_first_tile":
+                args.get_state_stack_one_hot = get_state_stack_one_hot_first_tile_places_black_white
+                args.options = 3
+                args.relevant_mode = 0
+            elif probe == "mine_theirs_first_tile":
+                args.get_state_stack_one_hot = get_state_stack_one_hot_first_tile_places_mine_theirs
+                args.options = 3
                 args.relevant_mode = 0
             trainer = LinearProbeTrainer(model, args)
             trainer.train()

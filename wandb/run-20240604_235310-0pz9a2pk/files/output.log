@@ -1,0 +1,31 @@
+
+
+  0%|                                                       | 0/13671 [00:03<?, ?it/s]
+Traceback (most recent call last):
+  File "/hpi/fs00/home/jim.maar/miniconda3/envs/arena-env/lib/python3.11/runpy.py", line 198, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/hpi/fs00/home/jim.maar/miniconda3/envs/arena-env/lib/python3.11/runpy.py", line 88, in _run_code
+    exec(code, run_globals)
+  File "/hpi/fs00/home/jim.maar/.vscode-server/extensions/ms-python.debugpy-2024.6.0-linux-x64/bundled/libs/debugpy/adapter/../../debugpy/launcher/../../debugpy/__main__.py", line 39, in <module>
+    cli.main()
+  File "/hpi/fs00/home/jim.maar/.vscode-server/extensions/ms-python.debugpy-2024.6.0-linux-x64/bundled/libs/debugpy/adapter/../../debugpy/launcher/../../debugpy/../debugpy/server/cli.py", line 430, in main
+    run()
+  File "/hpi/fs00/home/jim.maar/.vscode-server/extensions/ms-python.debugpy-2024.6.0-linux-x64/bundled/libs/debugpy/adapter/../../debugpy/launcher/../../debugpy/../debugpy/server/cli.py", line 284, in run_file
+    runpy.run_path(target, run_name="__main__")
+  File "/hpi/fs00/home/jim.maar/.vscode-server/extensions/ms-python.debugpy-2024.6.0-linux-x64/bundled/libs/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_runpy.py", line 321, in run_path
+    return _run_module_code(code, init_globals, run_name,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/hpi/fs00/home/jim.maar/.vscode-server/extensions/ms-python.debugpy-2024.6.0-linux-x64/bundled/libs/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_runpy.py", line 135, in _run_module_code
+    _run_code(code, mod_globals, init_globals,
+  File "/hpi/fs00/home/jim.maar/.vscode-server/extensions/ms-python.debugpy-2024.6.0-linux-x64/bundled/libs/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_runpy.py", line 124, in _run_code
+    exec(code, run_globals)
+  File "/hpi/fs00/home/jim.maar/interpretability/training_probes.py", line 304, in <module>
+    trainer.train()
+  File "/hpi/fs00/home/jim.maar/interpretability/training_probes.py", line 249, in train
+    loss = trainer.training_step(indices)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/hpi/fs00/home/jim.maar/interpretability/training_probes.py", line 158, in training_step
+    games_int = board_seqs_int[indices.cpu()]
+                ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+IndexError: index 2648699 is out of bounds for dimension 0 with size 100000
