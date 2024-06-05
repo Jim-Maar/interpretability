@@ -1,0 +1,107 @@
+wandb_version: 1
+
+layer:
+  desc: null
+  value: 0
+pos_start:
+  desc: null
+  value: 5
+pos_end:
+  desc: null
+  value: 54
+length:
+  desc: null
+  value: 49
+alternating:
+  desc: null
+  value: "[ 1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1\n\
+    \  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1  1 -1\n  1]"
+options:
+  desc: null
+  value: 3
+rows:
+  desc: null
+  value: 8
+cols:
+  desc: null
+  value: 8
+max_epochs:
+  desc: null
+  value: 1
+num_games_train:
+  desc: null
+  value: 3500000
+num_games_val:
+  desc: null
+  value: 0
+num_games_test:
+  desc: null
+  value: 0
+batch_size:
+  desc: null
+  value: 256
+lr:
+  desc: null
+  value: 0.0001
+betas:
+  desc: null
+  value:
+  - 0.9
+  - 0.99
+wd:
+  desc: null
+  value: 0.01
+probe_name:
+  desc: null
+  value: mine_theirs_first_tile
+full_probe_name:
+  desc: null
+  value: mine_theirs_first_tile_L0
+wandb_project:
+  desc: null
+  value: Othello-GPT-Probes
+modes:
+  desc: null
+  value: 3
+get_state_stack_one_hot:
+  desc: null
+  value: training_utils.get_state_stack_one_hot_first_tile_places_mine_theirs
+relevant_mode:
+  desc: null
+  value: 0
+_wandb:
+  desc: null
+  value:
+    python_version: 3.11.9
+    cli_version: 0.17.0
+    framework: huggingface
+    huggingface_version: 4.41.1
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1717537584
+    t:
+      1:
+      - 1
+      - 11
+      - 49
+      - 51
+      - 55
+      - 71
+      2:
+      - 1
+      - 11
+      - 49
+      - 51
+      - 55
+      - 71
+      3:
+      - 13
+      - 16
+      - 23
+      - 61
+      4: 3.11.9
+      5: 0.17.0
+      6: 4.41.1
+      8:
+      - 5
+      13: linux-x86_64

@@ -1,0 +1,38 @@
+/hpi/fs00/home/jim.maar/miniconda3/envs/arena-env/lib/python3.11/site-packages/accelerate/utils/imports.py:274: UserWarning: `ACCELERATE_DISABLE_RICH` is deprecated and will be removed in v0.22.0 and deactivated by default. Please use `ACCELERATE_ENABLE_RICH` if you wish to use `rich`.
+  warnings.warn(
+device: cuda
+wandb: Currently logged in as: jim-maar (feedback2code). Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.17.0
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240604_214624-06o2mkew
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run mine_theirs_first_tile_L0
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT-Probes
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT-Probes/runs/06o2mkew
+  0%|          | 0/13671 [00:00<?, ?it/s]  0%|          | 0/13671 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "/hpi/fs00/home/jim.maar/interpretability/training_probes.py", line 304, in <module>
+    trainer.train()
+  File "/hpi/fs00/home/jim.maar/interpretability/training_probes.py", line 250, in train
+    loss.backward()
+  File "/hpi/fs00/home/jim.maar/miniconda3/envs/arena-env/lib/python3.11/site-packages/torch/_tensor.py", line 487, in backward
+    torch.autograd.backward(
+  File "/hpi/fs00/home/jim.maar/miniconda3/envs/arena-env/lib/python3.11/site-packages/torch/autograd/__init__.py", line 200, in backward
+    Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn
+wandb: - 0.006 MB of 0.006 MB uploadedwandb: \ 0.006 MB of 0.020 MB uploadedwandb: | 0.020 MB of 0.020 MB uploadedwandb: 
+wandb: Run history:
+wandb:      train_loss ▁
+wandb:  train_loss_all ▁
+wandb: train_loss_even ▁
+wandb:  train_loss_odd ▁
+wandb: 
+wandb: Run summary:
+wandb:      train_loss 218.0797
+wandb:  train_loss_all 72.38721
+wandb: train_loss_even 73.03709
+wandb:  train_loss_odd 72.6554
+wandb: 
+wandb: 🚀 View run mine_theirs_first_tile_L0 at: https://wandb.ai/feedback2code/Othello-GPT-Probes/runs/06o2mkew
+wandb: ⭐️ View project at: https://wandb.ai/feedback2code/Othello-GPT-Probes
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240604_214624-06o2mkew/logs

@@ -37,6 +37,8 @@ from transformer_lens.hook_points import HookedRootModule, HookPoint
 from transformer_lens import HookedTransformer, HookedTransformerConfig, FactoredMatrix, ActivationCache
 import utils
 
+from utils import seq_to_state_stack
+
 device = t.device("cuda" if t.cuda.is_available() else "cpu")
 
 t.set_grad_enabled(False)
@@ -73,21 +75,9 @@ options = 3
 BLANK = 0
 FILLED_UNAFFECTED = 1
 FLIPPED = 2
-PLAYED = 3
-UNAFFECTED = 4
-
-
-def seq_to_state_stack(str_moves):
-    """
-    Takes a sequence of moves and returns a stack of states for each move with dimensions (num_moves, rows, cols)
-    """
-    board = OthelloBoardState()
-    states = []
-    for move in str_moves:
-        board.umpire(move)
-        states.append(np.copy(board.state))
-    states = np.stack(states, axis=0)
-    return states
+PLAYED_BLACK = 3
+PLAYED_WHITE = 4
+UNAFFECTED = 5
 
 def state_stack_to_one_hot(state_stack):
     '''
@@ -118,13 +108,15 @@ def seq_to_state_stack_flipped(str_moves):
     0: blank
     1: unaffected
     2: flipped
-    3: played
+    3: played_black
+    4: played_white
     """
     if isinstance(str_moves, t.Tensor):
         str_moves = str_moves.tolist()
     board = OthelloBoardState()
     states = []
-    for move in str_moves:
+    for move_idx, move in enumerate(str_moves):
+        player = "black" if move_idx % 2 == 0 else "white"
         try:
             flipped = board.umpire_return_flipped(move)
         except RuntimeError:
@@ -139,7 +131,10 @@ def seq_to_state_stack_flipped(str_moves):
 
         # Update played cell
         row, col = move // 8, move % 8
-        _state[row, col] = PLAYED
+        if player == "black":
+            _state[row, col] = PLAYED_BLACK
+        else:
+            _state[row, col] = PLAYED_WHITE
 
         states.append(_state)
     states = np.stack(states, axis=0)
@@ -176,7 +171,7 @@ def state_stack_to_one_hot_flipped(state_stack):
 
 
 # This function takes game indeces as input and returns a tensor of shape (games, moves, rows=8, cols=8, flipped=2)
-def get_state_stack_one_hot_flipped(games_str : Int[Tensor, "num_games len_of_game"], args):
+def get_state_stack_one_hot_flipped(games_str : Int[Tensor, "num_games len_of_game"]):
     """
     Returns a tensor of shape (games, moves, rows=8, cols=8, flipped=2) where the last dimension is a one-hot encoding
     of whether the tile was flipped or not.
@@ -186,14 +181,14 @@ def get_state_stack_one_hot_flipped(games_str : Int[Tensor, "num_games len_of_ga
     # state_stack = state_stack[:, args.pos_start: args.pos_end, :, :]
     #state_stack_one_hot = state_stack_to_one_hot(state_stack).to(device)
     state_stack = build_state_stack_flipped(games_str)
-    state_stack = state_stack[:, args.pos_start:args.pos_end, :, :]
+    # state_stack = state_stack[:, args.pos_start:args.pos_end, :, :]
     state_stack_one_hot = state_stack_to_one_hot_flipped(
         state_stack
     ).cuda()
     return state_stack_one_hot
 
 
-def get_state_stack_flipped(games_str : Int[Tensor, "num_games len_of_game"], args):
+def get_state_stack_num_flipped(games_str : Int[Tensor, "num_games len_of_game"]):
     state_stack = build_state_stack_flipped(games_str)
     # turn 2 (Flipped) into 1, everything else to 0
     # Not the same game that gets plotted
@@ -203,33 +198,105 @@ def get_state_stack_flipped(games_str : Int[Tensor, "num_games len_of_game"], ar
         _state = einops.reduce(state_stack[:, :idx+1, :, :], 'num_games moves rows cols -> num_games rows cols', 'sum')
         state_stack_num_flipped.append(_state)
     state_stack_num_flipped = t.stack(state_stack_num_flipped, dim=1)
-    state_stack_num_flipped = state_stack_num_flipped[:, args.pos_start:args.pos_end, :, :]
+    # if only_middle:
+    #     state_stack_num_flipped = state_stack_num_flipped[:, args.pos_start:args.pos_end, :, :]
     return state_stack_num_flipped
 
 
 # This function takes game indeces as input and returns a tensor of shape (games, moves, rows=8, cols=8, flipped=18)
-def get_state_stack_one_hot_num_flipped(games_str : Int[Tensor, "num_games len_of_game"], args):
+def get_state_stack_one_hot_num_flipped(games_str : Int[Tensor, "num_games len_of_game"]):
     """
     Returns a tensor of shape (games, moves, rows=8, cols=8, flipped=2) where the last dimension is a one-hot encoding
     of how often the tile was flipped
     """
     # (num_games, moves, rows, cols) numbers from 0 to 18
-    state_stack_num_flipped = get_state_stack_flipped(games_str, args)
+    state_stack_num_flipped = get_state_stack_num_flipped(games_str)
     state_stack_one_hot_num_flipped = t.nn.functional.one_hot(
         state_stack_num_flipped, num_classes=18
     ).cuda()
     return state_stack_one_hot_num_flipped
 
 
-def get_state_stack_one_hot_even_odd_flipped(games_str : Int[Tensor, "num_games len_of_game"], args):
+def get_state_stack_one_hot_even_odd_flipped(games_str : Int[Tensor, "num_games len_of_game"]):
     """
     Returns a tensor of shape (games, moves, rows=8, cols=8, flipped=2) where the last dimension is a one-hot encoding
     of how often the tile was flipped
     """
     # (num_games, moves, rows, cols) numbers from 0 to 18
-    state_stack_even_odd_flipped = get_state_stack_flipped(games_str, args)
+    state_stack_even_odd_flipped = get_state_stack_num_flipped(games_str)
     state_stack_even_odd_flipped = state_stack_even_odd_flipped % 2
     state_stack_one_hot_even_odd_flipped = t.nn.functional.one_hot(
         state_stack_even_odd_flipped, num_classes=2
     ).cuda()
     return state_stack_one_hot_even_odd_flipped
+
+
+def get_state_stack_first_tile_places_black_white(games_str : Int[Tensor, "num_games len_of_game"]):
+    """
+    Returns a tensor of shape (games, moves, rows=8, cols=8, flipped=2) where the last dimension is a one-hot encoding
+    of what the first tile placed was
+    """
+    # (num_games, moves, rows, cols) numbers from -1 to 1
+    state_stack = build_state_stack_flipped(games_str).to(dtype=t.long)
+    state_stack_first_tile_places_black_white = []
+    _state = t.zeros(state_stack.shape[0], state_stack.shape[2], state_stack.shape[3], device=state_stack.device, dtype=t.long)
+    _state[:, 3, 3], _state[:, 4, 4], _state[:, 3, 4], _state[:, 4, 3] = 2, 2, 1, 1
+
+    for idx in range(0, state_stack.shape[1]):
+        new_state = state_stack[:, idx, :, :]
+        # TODO: This doesen't work plus figure out what device everything should be one plus debug the function not the complete script ...
+        new_state[new_state == 1], new_state[new_state == 2], new_state[new_state == 5] = 0, 0, 0
+        # black
+        new_state[new_state == 3] = 1
+        # white
+        new_state[new_state == 4] = 2
+        _state = _state + new_state
+        state_stack_first_tile_places_black_white.append(_state)
+    state_stack_first_tile_places_black_white = t.stack(state_stack_first_tile_places_black_white, dim=1)
+    return state_stack_first_tile_places_black_white.to(dtype=t.long)
+
+def get_state_stack_one_hot_first_tile_places_black_white(games_str : Int[Tensor, "num_games len_of_game"]):
+    state_stack_first_tile_places_black_white = get_state_stack_first_tile_places_black_white(games_str)
+    # print(state_stack_first_tile_places_black_white[0, 14])
+    state_stack_one_hot_first_tile_places_black_white = t.nn.functional.one_hot(
+        state_stack_first_tile_places_black_white, num_classes=3
+    ).cuda()
+    return state_stack_one_hot_first_tile_places_black_white
+
+
+def get_state_stack_first_tile_places_mine_theirs(games_str : Int[Tensor, "num_games len_of_game"]):
+    state_stack_first_tile_places_mine_theirs = get_state_stack_first_tile_places_black_white(games_str)
+    state_stack_first_tile_places_mine_theirs[:, 1::2, :, :] *= -1
+    state_stack_first_tile_places_mine_theirs[state_stack_first_tile_places_mine_theirs == 2], state_stack_first_tile_places_mine_theirs[state_stack_first_tile_places_mine_theirs == 1] = 1, 2
+    state_stack_first_tile_places_mine_theirs[state_stack_first_tile_places_mine_theirs == -2], state_stack_first_tile_places_mine_theirs[state_stack_first_tile_places_mine_theirs == -1] = 2, 1
+    return state_stack_first_tile_places_mine_theirs
+
+def get_state_stack_one_hot_first_tile_places_mine_theirs(games_str : Int[Tensor, "num_games len_of_game"]):
+    state_stack_first_tile_places_mine_theirs = get_state_stack_first_tile_places_mine_theirs(games_str)
+    # print(state_stack_first_tile_places_mine_theirs[0, 14])
+    state_stack_one_hot_first_tile_places_mine_theirs = t.nn.functional.one_hot(
+        state_stack_first_tile_places_mine_theirs, num_classes=3
+    ).cuda()
+    return state_stack_one_hot_first_tile_places_mine_theirs
+
+
+'''board_seqs_string = t.load(
+    os.path.join(
+        section_dir,
+        "data/board_seqs_string_train.pth",
+    )
+)
+games_str = board_seqs_string[:10]
+assert games_str.shape == (10, 60)
+
+state_one_hot = get_state_stack_one_hot_first_tile_places_black_white(games_str)
+assert state_one_hot.shape == (10, 60, 8, 8, 3)
+# print(state_one_hot[0, 15])
+
+state_one_hot = get_state_stack_one_hot_first_tile_places_mine_theirs(games_str)
+assert state_one_hot.shape == (10, 60, 8, 8, 3)
+# print(state_one_hot[0, 15])
+
+from utils import plot_game
+plot_game(games_str, 0)'''
+

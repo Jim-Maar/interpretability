@@ -1,0 +1,16 @@
+  0%|          | 0/13671 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "/hpi/fs00/home/jim.maar/interpretability/training_probes.py", line 303, in <module>
+    trainer.train()
+  File "/hpi/fs00/home/jim.maar/interpretability/training_probes.py", line 248, in train
+    loss = trainer.training_step(indices)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/hpi/fs00/home/jim.maar/interpretability/training_probes.py", line 165, in training_step
+    state_stack_one_hot = args.get_state_stack_one_hot(games_str).to(device)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/hpi/fs00/home/jim.maar/interpretability/training_utils.py", line 279, in get_state_stack_one_hot_first_tile_places_mine_theirs
+    ).cuda()
+      ^^^^^^
+  File "/hpi/fs00/home/jim.maar/miniconda3/envs/arena-env/lib/python3.11/site-packages/torch/cuda/__init__.py", line 247, in _lazy_init
+    torch._C._cuda_init()
+RuntimeError: No CUDA GPUs are available
