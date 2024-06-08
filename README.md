@@ -40,3 +40,21 @@
 >     * We can project residual stream vectors along these directions to get meaningful quantities (the model's "relative blank logprob", and "relative mine vs theirs logprob").
 > * **`OthelloBoardState` is a class which is useful for creating board states over time.**
 >     * You don't need to know how to use it; the code will always be given to you.
+
+## Plotting Functions
+- plot_single_board(int_to_label(moves_int))
+For comparison, let's plot the board state after 30 moves, and the valid moves.
+
+A reminder about how parity works - blacks plays first, and so the 30th move is white's 15th move, hence we see white's last move in the plot below.
+
+`plot_single_board` is a helper function to plot the board state after a series of moves. It takes in moves in the label format (i.e. A0 to H7) so we use the function `int_to_label` to convert. The colors represent the board state:
+
+* Dark orange <font color='#CA562C'>▉</font> means a black piece
+* Dark green <font color='#008080'>▉</font> means a white piece
+* Mid orange <font color='#E6A272'>▉</font> is a legal next move for black
+* Mid green <font color='#92B63A'>▉</font> is a legal next move for white
+* The different shades of very pale colors indicate which of the previous moves would have been legal (don't worry about this)
+* Red circle around a piece means "most recently played"
+* Purple circle around a piece means "was just flipped by the most recent move"
+
+Note that we don't see mid green <font color='#92B63A'>▉</font> in the plot below because the last move was white; if we plot the board state after an odd number of moves then we'd see this color.

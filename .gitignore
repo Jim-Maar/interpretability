@@ -1,9 +1,5 @@
-data/
-wandb/
-slurm/
-other/
-models/
-models2/
-__pycache__/
-run.sh
-slurmout.log
+data
+wandb
+slurm
+other
+__pycache__
