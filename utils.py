@@ -74,9 +74,14 @@ def plot_square_as_board(state, diverging_scale=True, **kwargs):
 def plot_probe_outputs(focus_cache, linear_probe, layer, game_index, move, **kwargs):
     residual_stream = focus_cache["resid_post", layer][game_index, move]
     # print("residual_stream", residual_stream.shape)
-    probe_out = einops.einsum(residual_stream, linear_probe, "d_model, d_model row col options -> row col options")
+    # probe_out = einops.einsum(residual_stream, linear_probe, "d_model, d_model row col options -> row col options")
+    probe_out = einops.einsum(residual_stream, linear_probe, "d_model, modes d_model row col options -> modes row col options")
+    if move % 2 == 0:
+        probe_out = probe_out[0]
+    else:
+        probe_out = probe_out[1] 
     probabilities = probe_out.softmax(dim=-1)
-    plot_square_as_board(probabilities, facet_col=2, facet_labels=["P(Empty)", "P(Their's)", "P(Mine)"], **kwargs)
+    plot_square_as_board(probabilities, facet_col=2, facet_labels=["P(Empty)", "P(Black)", "P(White)"], **kwargs)
 
 def plot_game(games_str, game_index=0, end_move=16):
     '''
