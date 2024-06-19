@@ -133,4 +133,4 @@ def get_focus_games(model = None, device = "cpu"):
     return focus_games_int, focus_games_string
 
 def square_tuple_from_square(square : str):
-    return (alpha.index(square[0]), int(square[1]))
+    return (alpha.index(square[0]), int(square[1])) 
