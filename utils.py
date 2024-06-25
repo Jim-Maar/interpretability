@@ -159,6 +159,7 @@ class VisualzeBoardArguments:
     static_image=False#
     size_of_board = 225
     margin_t = 100
+    mode = "linear"
 
 def get_score_from_resid(resid, layer):
     # assert probe_name in ["linear", "flipped"]
@@ -178,7 +179,7 @@ def get_score_from_resid(resid, layer):
     # Flip the color score on the rows dimension
     # TODO: Add Flips as Labels...
     color_score = color_score.flip(1)
-    flip_score = flipped_probs[:, :, :, [0]].flip(1)
+    flip_score = flipped_probs[:, :, :, [0]].flip(1).squeeze(dim=-1)
     return color_score, flip_score
 
 def get_boards(input_int : Float[Tensor, "pos"], vis_args : VisualzeBoardArguments, model: HookedTransformer):
@@ -222,7 +223,7 @@ def get_boards(input_int : Float[Tensor, "pos"], vis_args : VisualzeBoardArgumen
 
 reverse_alpha = ["H", "G", "F", "E", "D", "C", "B", "A"]
 
-def plot_boards(label_list: List[str], boards : Float[Tensor, "layers pos rows cols"], flip_boards : Float[Tensor, "layers pos rows cols"], vis_args: VisualzeBoardArguments):
+def plot_boards(label_list: List[str], boards : Float[Tensor, "layers mode pos rows cols"], flip_boards : Float[Tensor, "layers mode pos rows cols"], vis_args: VisualzeBoardArguments):
     # TODO: add attn/mlp only
     # TODO: Change Width and Height accordingly
     _, _, _, rows, cols = boards.shape
@@ -245,8 +246,8 @@ def plot_boards(label_list: List[str], boards : Float[Tensor, "layers pos rows c
         for layer in range(vis_args.layers):
             for mode_idx, mode in enumerate(modes):
                 text_data = [[get_color(flip_boards[layer, mode_idx, pos, i, j]) for j in range(cols)] for i in range(rows)]
-                fig.add_trace(
-                    go.Heatmap(
+                if vis_args.mode == "linear":
+                    heatmap = go.Heatmap(
                         z=boards[layer, mode_idx, pos].cpu(),
                         text=text_data,
                         x=list(range(0, rows)),
@@ -257,7 +258,21 @@ def plot_boards(label_list: List[str], boards : Float[Tensor, "layers pos rows c
                         colorscale="RdBu",
                         texttemplate="%{text}",
                         # textfont_color="green",
-                    ),
+                    )
+                elif vis_args.mode == "flipped":
+                    heatmap = go.Heatmap(
+                        z=flip_boards[layer, mode_idx, pos].cpu(),
+                        x=list(range(0, rows)),
+                        y=reverse_alpha,
+                        hoverongaps = False,
+                        zmin=0.0,
+                        zmax=1.0,
+                        colorscale="Greens", # Green color scale
+                    )
+                else:
+                    raise ValueError("Invalid Mode")
+                fig.add_trace(
+                    heatmap,
                     row=pos_idx * len(modes) + mode_idx + 1,
                     col=layer + 1
                 )
@@ -279,15 +294,22 @@ def visualize_game(input_str, vis_args: VisualzeBoardArguments, model: HookedTra
     boards, flip_boards = get_boards(t.Tensor(to_int(input_str)).to(t.int32), vis_args, model)
     plot_boards(label_list, boards, flip_boards, vis_args)
 
-'''vis_args = VisualzeBoardArguments()
-vis_args.start_pos = 5
-vis_args.end_pos = 15
-vis_args.layers = 6
-vis_args.include_attn_only = False
-vis_args.include_mlp_only = False
-# vis_args.static_image = True
 
-visualize_game(clean_input_str, vis_args)'''
+if __name__ == "__main__":
+    vis_args = VisualzeBoardArguments()
+    vis_args.start_pos = 0
+    vis_args.end_pos = 20
+    vis_args.layers = 6
+    vis_args.include_attn_only = False
+    vis_args.include_mlp_only = False
+    vis_args.mode = "flipped"
+    # vis_args.static_image = True
+
+    model = load_model("cuda")
+    _, focus_games_str = get_focus_games()
+
+    clean_input_str = focus_games_str[0][:59]
+    visualize_game(clean_input_str, vis_args, model)
 
 
     
