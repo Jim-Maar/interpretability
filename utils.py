@@ -7,7 +7,12 @@ from pathlib import Path
 import numpy as np
 
 import torch as t
-
+from jaxtyping import Float, Int, Bool, Shaped, jaxtyped
+from typing import List, Union, Optional, Tuple, Callable, Dict
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from torch import Tensor
+from dataclasses import dataclass
 
 # os.chdir(section_dir)
 section_dir = Path.cwd()
@@ -20,7 +25,8 @@ sys.path.append(str(OTHELLO_MECHINT_ROOT))
 from mech_interp_othello_utils import (
     OthelloBoardState,
     to_int,
-    to_string
+    to_string,
+    string_to_label
 )
 
 # Load Model
@@ -134,3 +140,154 @@ def get_focus_games(model = None, device = "cpu"):
 
 def square_tuple_from_square(square : str):
     return (alpha.index(square[0]), int(square[1])) 
+
+
+def get_color(val : float):
+    val = min(int(val * 5), 4)
+    # Define the gradient characters from darkest to lightest
+    gradient_chars = [" ", "░", "▒", "▓", "█"]
+    return gradient_chars[val]
+
+@dataclass
+class VisualzeBoardArguments:
+    include_attn_only = False
+    include_mlp_only = False
+    include_pre_resid = False
+    start_pos=0
+    end_pos=59
+    layers=8
+    static_image=False#
+    size_of_board = 225
+    margin_t = 100
+
+def get_score_from_resid(resid, layer):
+    # assert probe_name in ["linear", "flipped"]
+    linear_probe = t.load(f"probes/linear/resid_{layer}_linear.pth").detach()
+    flipped_probe = t.load(f"probes/flipped/resid_{layer}_flipped.pth").detach()
+    assert len(resid.shape) == 2
+    seq_len, d_model = resid.shape
+    logits = einops.einsum(resid, linear_probe, 'pos d_model, modes d_model rows cols options -> modes pos rows cols options')[0]
+    probs = logits.softmax(dim=-1)
+    flipped_logits = einops.einsum(resid, flipped_probe, 'pos d_model, modes d_model rows cols options -> modes pos rows cols options')[0]
+    flipped_probs = flipped_logits.softmax(dim=-1)
+    probs_copy = probs.clone()
+    # Convert Back to Balck/White
+    for i in range(0, seq_len, 2):
+        probs[i, :, :, 1], probs[i, :, :, 2] = probs_copy[i, :, :, 2], probs_copy[i, :, :, 1]
+    color_score = 0.5 + (probs[:, :, :, 2] - probs[:, :, :, 1])/2
+    # Flip the color score on the rows dimension
+    # TODO: Add Flips as Labels...
+    color_score = color_score.flip(1)
+    flip_score = flipped_probs[:, :, :, [0]].flip(1)
+    return color_score, flip_score
+
+def get_boards(input_int : Float[Tensor, "pos"], vis_args : VisualzeBoardArguments, model: HookedTransformer):
+    _, cache = model.run_with_cache(input_int)
+    boards = []
+    flip_boards = []
+    for layer in range(8):
+        color_scores = []
+        flip_scores = []
+        resid = cache["resid_post", layer][0].detach()
+        color_score, flip_score = get_score_from_resid(resid, layer)
+        color_scores += [color_score]
+        flip_scores += [flip_score]
+        if vis_args.include_pre_resid:
+            resid = cache["resid_pre", layer][0].detach()
+            color_score, flip_score = get_score_from_resid(resid, layer)
+            color_scores += [color_score]
+            flip_scores += [flip_score]
+        if vis_args.include_attn_only:
+            resid = cache["resid_post", layer][0].detach() - t.stack([cache["mlp_out", l][0].detach() for l in range(layer, layer + 1)]).sum(dim=0) - cache["resid_pre", layer][0].detach()
+            color_score, flip_score = get_score_from_resid(resid, layer)
+            color_scores += [color_score]
+            flip_scores += [flip_score]
+        if vis_args.include_mlp_only:
+            resid = cache["resid_post", layer][0].detach() - t.stack([cache["attn_out", l][0].detach() for l in range(layer, layer + 1)]).sum(dim=0) - cache["resid_pre", layer][0].detach()
+            color_score, flip_score = get_score_from_resid(resid, layer)
+            color_scores += [color_score]
+            flip_scores += [flip_score]
+        color_score = t.stack(color_scores, dim=0)
+        # color_score = color_score.transpose(0, 1)
+        # color_score = color_score.reshape(-1, 8, 8)
+        flip_score = t.stack(flip_scores, dim=0)
+        # flip_score = flip_score.transpose(0, 1)
+        # flip_score = flip_score.reshape(-1, 8, 8)
+        # color_score, flip_score = get_score_from_resid(resid, layer)
+        boards += [color_score]
+        flip_boards += [flip_score]
+    boards = t.stack(boards)
+    flip_boards = t.stack(flip_boards)
+    return boards, flip_boards
+
+reverse_alpha = ["H", "G", "F", "E", "D", "C", "B", "A"]
+
+def plot_boards(label_list: List[str], boards : Float[Tensor, "layers pos rows cols"], flip_boards : Float[Tensor, "layers pos rows cols"], vis_args: VisualzeBoardArguments):
+    # TODO: add attn/mlp only
+    # TODO: Change Width and Height accordingly
+    _, _, _, rows, cols = boards.shape
+    print(boards.shape)
+    seq_len = vis_args.end_pos - vis_args.start_pos
+    modes = ["N"]
+    if vis_args.include_pre_resid:
+        modes += ["P"]
+    if vis_args.include_attn_only:
+        modes += ["A"]
+    if vis_args.include_mlp_only:
+        modes += ["M"]
+    subplot_titles = [f"P: {i}, T: {label_list[i]}, L: {j}, M: {mode}" for i in range(vis_args.start_pos, vis_args.end_pos) for mode in modes for j in range(vis_args.layers)]
+    # subplot_titles = [f"P: {i}, T: {label_list[i]}, L: {j}" for i in range(vis_args.start_pos, vis_args.end_pos) for j in range(vis_args.layers)]
+    width = vis_args.layers * vis_args.size_of_board
+    height = vis_args.margin_t + seq_len * len(modes) * vis_args.size_of_board
+    vertical_spacing = 70 / height
+    fig = make_subplots(rows=seq_len * len(modes), cols=vis_args.layers, subplot_titles=subplot_titles, vertical_spacing=vertical_spacing)
+    for pos_idx, pos in enumerate(range(vis_args.start_pos, vis_args.end_pos)):
+        for layer in range(vis_args.layers):
+            for mode_idx, mode in enumerate(modes):
+                text_data = [[get_color(flip_boards[layer, mode_idx, pos, i, j]) for j in range(cols)] for i in range(rows)]
+                fig.add_trace(
+                    go.Heatmap(
+                        z=boards[layer, mode_idx, pos].cpu(),
+                        text=text_data,
+                        x=list(range(0, rows)),
+                        y=reverse_alpha,
+                        hoverongaps = False,
+                        zmin=0.0,
+                        zmax=1.0,
+                        colorscale="RdBu",
+                        texttemplate="%{text}",
+                        # textfont_color="green",
+                    ),
+                    row=pos_idx * len(modes) + mode_idx + 1,
+                    col=layer + 1
+                )
+    fig.layout.update(width=width, height=height, margin_t=vis_args.margin_t, title_text=f"Probe Results per Position per Layer, Mode: {modes[0]}") 
+    if vis_args.static_image:
+        # count the number of images in the last_plot directory
+        num_images = len(list(Path("last_plot").glob("*.png")))
+        fig.write_image(f'last_plot/last_plot{num_images+1}.png')
+    else:
+        fig.show()
+
+
+def visualize_game(input_str, vis_args: VisualzeBoardArguments, model: HookedTransformer):
+    # 1. Get the cache
+    # 2. Get Board States from the cache using the Pobes
+    # 3. Plot the Board States
+    # assert not (vis_args.include_attn_only and vis_args.include_mlp_only)
+    label_list = string_to_label(input_str)
+    boards, flip_boards = get_boards(t.Tensor(to_int(input_str)).to(t.int32), vis_args, model)
+    plot_boards(label_list, boards, flip_boards, vis_args)
+
+'''vis_args = VisualzeBoardArguments()
+vis_args.start_pos = 5
+vis_args.end_pos = 15
+vis_args.layers = 6
+vis_args.include_attn_only = False
+vis_args.include_mlp_only = False
+# vis_args.static_image = True
+
+visualize_game(clean_input_str, vis_args)'''
+
+
+    

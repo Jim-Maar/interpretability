@@ -125,6 +125,8 @@ def generate_patch(min_length: int = 55, min_flipped_clean: int = 1, max_flipped
                 continue
         if same_flips and not flipped_list_clean == flipped_list_corrupt:
             continue
+        if not same_flips and set(flipped_list_clean) & set(flipped_list_corrupt):
+            continue
         patch_info = dict()
         patch_info["board_history_clean"] = board_history_clean
         patch_info["board_history_corrupt"] = board_history_corrupt
