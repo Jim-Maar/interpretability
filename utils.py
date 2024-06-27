@@ -13,6 +13,9 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from torch import Tensor
 from dataclasses import dataclass
+from jinja2 import Template
+
+import os
 
 # os.chdir(section_dir)
 section_dir = Path.cwd()
@@ -141,6 +144,71 @@ def get_focus_games(model = None, device = "cpu"):
 def square_tuple_from_square(square : str):
     return (alpha.index(square[0]), int(square[1])) 
 
+reverse_alpha = ["H", "G", "F", "E", "D", "C", "B", "A"]
+
+
+
+def save_plotly_to_html(fig, filename):
+    TEMPLATE_PATH = "interactive_plots/template.html"
+    assert os.path.exists(TEMPLATE_PATH)
+    plotly_jinja_data = {"fig":fig.to_html(full_html=False)}
+    with open(filename, "w", encoding="utf-8") as output_file:
+        with open(TEMPLATE_PATH) as template_file:
+            j2_template = Template(template_file.read())
+            output_file.write(j2_template.render(plotly_jinja_data))
+
+def save_plotly_to_png(fig, filename):
+    fig.write_image(filename)
+
+def save_plotly(fig, name):
+    save_plotly_to_html(fig, f"interactive_plots/{name}.html")
+    save_plotly_to_png(fig, f"plots/{name}.png")
+
+def plot_boards_general(x_labels : List[str],
+                        y_labels : List[str],
+                        boards : Float[Tensor, "x y rows cols"],
+                        size_of_board : Int = 200,
+                        margin_t : Int = 100,
+                        title_text : str = "",
+                        static_image : bool = False,
+                        save : bool = False):
+    # TODO: add attn/mlp only
+    # TODO: Change Width and Height accordingly
+    x_len, y_len, rows, cols = boards.shape
+    subplot_titles = [f"{y_label}, {x_label}" for y_label in y_labels for x_label in x_labels]
+    # subplot_titles = [f"P: {i}, T: {label_list[i]}, L: {j}" for i in range(vis_args.start_pos, vis_args.end_pos) for j in range(vis_args.layers)]
+    width = x_len * size_of_board
+    height = y_len * size_of_board
+    vertical_spacing = 70 / height
+    fig = make_subplots(rows=y_len, cols=x_len, subplot_titles=subplot_titles, vertical_spacing=vertical_spacing)
+    boards_min = boards.min().item()
+    boards_max = boards.max().item()
+    abs_max = max(abs(boards_min), abs(boards_max))
+    for x in range(x_len):
+        for y in range(y_len):
+            heatmap = go.Heatmap(
+                z=boards[x, y].cpu(),
+                x=list(range(0, rows)),
+                y=reverse_alpha,
+                hoverongaps = False,
+                zmin=-abs_max,
+                zmax=abs_max,
+                colorscale="RdBu",
+            )
+            fig.add_trace(
+                heatmap,
+                row=y + 1,
+                col=x + 1
+            )
+    fig.layout.update(width=width, height=height, margin_t=margin_t, title_text=title_text) 
+    if static_image:
+        # count the number of images in the last_plot directory
+        num_images = len(list(Path("last_plot").glob("*.png")))
+        fig.write_image(f'last_plot/last_plot{num_images+1}.png')
+    else:
+        fig.show()
+    if save:
+        save_plotly(fig, title_text)
 
 def get_color(val : float):
     val = min(int(val * 5), 4)
@@ -220,8 +288,6 @@ def get_boards(input_int : Float[Tensor, "pos"], vis_args : VisualzeBoardArgumen
     boards = t.stack(boards)
     flip_boards = t.stack(flip_boards)
     return boards, flip_boards
-
-reverse_alpha = ["H", "G", "F", "E", "D", "C", "B", "A"]
 
 def plot_boards(label_list: List[str], boards : Float[Tensor, "layers mode pos rows cols"], flip_boards : Float[Tensor, "layers mode pos rows cols"], vis_args: VisualzeBoardArguments):
     # TODO: add attn/mlp only
