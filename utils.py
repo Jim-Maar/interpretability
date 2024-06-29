@@ -32,6 +32,17 @@ from mech_interp_othello_utils import (
     string_to_label
 )
 
+BLANK1 = 0
+BLACK = 1
+WHITE = -1
+
+EMPTY = 0
+YOURS = 1
+MINE = 2
+
+FLIPPED = 0
+NOT_FLIPPED = 1
+
 # Load Model
 def load_model(device):
     cfg = HookedTransformerConfig(
@@ -356,9 +367,19 @@ def visualize_game(input_str, vis_args: VisualzeBoardArguments, model: HookedTra
     # 2. Get Board States from the cache using the Pobes
     # 3. Plot the Board States
     # assert not (vis_args.include_attn_only and vis_args.include_mlp_only)
+    if len(input_str) > 59:
+        input_str = input_str[:59]
     label_list = string_to_label(input_str)
     boards, flip_boards = get_boards(t.Tensor(to_int(input_str)).to(t.int32), vis_args, model)
     plot_boards(label_list, boards, flip_boards, vis_args)
+
+
+def tile_state_to_str(tile_state):
+    return "EMPTY" if tile_state == EMPTY else "YOURS" if tile_state == YOURS else "MINE"
+
+def str_to_tile_state(tile_state_str):
+    tile_state_str = tile_state_str.upper()
+    return EMPTY if tile_state_str == "EMPTY" else YOURS if tile_state_str == "YOURS" else MINE if tile_state_str == "MINE" else FLIPPED if tile_state_str == "FLIPPED" else NOT_FLIPPED
 
 
 if __name__ == "__main__":
