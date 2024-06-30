@@ -42,7 +42,7 @@ from tqdm import tqdm
 
 import wandb
 
-from training_utils import get_state_stack_one_hot_flipped, get_state_stack_one_hot_num_flipped, get_state_stack_one_hot_even_odd_flipped, get_state_stack_one_hot_first_tile_places_black_white, get_state_stack_one_hot_first_tile_places_mine_theirs
+from training_utils import get_state_stack_one_hot_flipped, get_state_stack_one_hot_num_flipped, get_state_stack_one_hot_even_odd_flipped, get_state_stack_one_hot_first_tile_places_black_white, get_state_stack_one_hot_first_tile_places_mine_theirs, get_state_stack_one_hot_empty_yours_mine
 
 device = t.device("cuda" if t.cuda.is_available() else "cpu")
 print(f"device: {device}")
@@ -104,8 +104,8 @@ class ProbeTrainingArgs():
 
     # Which layer, and which positions in a game sequence to probe
     layer: int = 6
-    pos_start: int = 5
-    pos_end: int = model.cfg.n_ctx - 5
+    pos_start: int = 0
+    pos_end: int = 59
     length: int = pos_end - pos_start
     alternating: Tensor = t.tensor([1 if i%2 == 0 else -1 for i in range(length)], device=device)
 
@@ -121,7 +121,7 @@ class ProbeTrainingArgs():
         num_games_val: int = 0
         num_games_test: int = 0
     else:
-        num_games_train: int = 3500000
+        num_games_train: int = 200000
         num_games_val: int = 0
         num_games_test: int = 0
 
@@ -130,7 +130,7 @@ class ProbeTrainingArgs():
         batch_size: int = 2
     else:
         batch_size: int = 256
-    lr: float = 1e-4
+    lr: float = 1e-2
     betas: Tuple[float, float] = (0.9, 0.99)
     wd: float = 0.01
 
@@ -146,10 +146,11 @@ class ProbeTrainingArgs():
 
     # probe_kind
     get_state_stack_one_hot = None
-    relevant_mode = 2
 
     # training
     has_bias = False
+
+    cache_position = "resid_post"
     
 
     # Code to get randomly initialized probe
@@ -207,12 +208,12 @@ class LinearProbeTrainer:
             _, cache = model.run_with_cache(
                 games_int[:, :-1].to(device),
                 return_type=None,
-                names_filter=lambda name: name.endswith("resid_post")
+                names_filter=lambda name: name.endswith(args.cache_position)
             )
-            resid_post = cache["resid_post", self.args.layer][:, self.args.pos_start: self.args.pos_end]
+            resid = cache[args.cache_position, self.args.layer][:, self.args.pos_start: self.args.pos_end]
 
         probe_out = einops.einsum(
-            resid_post,
+            resid.clone().to(device),
             self.linear_probe,
             "batch pos d_model, modes d_model rows cols options -> modes batch pos rows cols options",
         )
@@ -225,13 +226,15 @@ class LinearProbeTrainer:
             "modes batch pos rows cols options -> modes pos rows cols",
             "mean"
         ) * self.args.options # Multiply to correct for the mean over options
-        loss_even = -probe_correct_log_probs[0, 0::2].mean(0).sum() # note that "even" means odd in the game framing, since we offset by 5 moves lol
-        loss_odd = -probe_correct_log_probs[1, 1::2].mean(0).sum()
-        loss_all = -probe_correct_log_probs[2, :].mean(0).sum()
-        loss = loss_even + loss_odd + loss_all
+        # loss_even = -probe_correct_log_probs[0, 0::2].mean(0).sum() # note that "even" means odd in the game framing, since we offset by 5 moves lol
+        # loss_odd = -probe_correct_log_probs[1, 1::2].mean(0).sum()
+        loss = -probe_correct_log_probs[0, :].mean(0).sum()
+        # loss = loss_even + loss_odd + loss_all
 
+        # if train_or_val == "train" and self.step % 10 == 0 and not DEBUG:
+        #     wandb.log({f"{train_or_val}_loss_even": loss_even.item(), f"{train_or_val}_loss_odd": loss_odd.item(), f"{train_or_val}_loss_all": loss_all.item(), f"{train_or_val}_loss": loss.item()}, step=self.step)
         if train_or_val == "train" and self.step % 10 == 0 and not DEBUG:
-            wandb.log({f"{train_or_val}_loss_even": loss_even.item(), f"{train_or_val}_loss_odd": loss_odd.item(), f"{train_or_val}_loss_all": loss_all.item(), f"{train_or_val}_loss": loss.item()}, step=self.step)
+            wandb.log({f"{train_or_val}_loss": loss.item()}, step=self.step)
         self.step += 1
 
         return loss
@@ -309,7 +312,7 @@ if __name__ == "__main__":
     # TODO: Add Probes for the other 5 Probes
     # TODO: Change position of where first and last part are removed
     # TODO: Use big dataset instead of small dataset
-    for probe in ["mine_theirs_first_tile", "num_flipped_with_bias", "even_odd_flipped", "num_flipped", "flipped", "black_white_first_tile"]:
+    '''for probe in ["mine_theirs_first_tile", "num_flipped_with_bias", "even_odd_flipped", "num_flipped", "flipped", "black_white_first_tile"]:
         for layer in range(8):
             args = ProbeTrainingArgs()
             args.layer = layer
@@ -342,5 +345,23 @@ if __name__ == "__main__":
                 args.get_state_stack_one_hot = get_state_stack_one_hot_first_tile_places_mine_theirs
                 args.options = 3
                 args.relevant_mode = 0
+            trainer = LinearProbeTrainer(model, args)
+            trainer.train()'''
+    args = ProbeTrainingArgs()
+    for probe in ["empty_yours_mine", "flipped"]:
+        for layer in range(8):
+            args = ProbeTrainingArgs()
+            args.layer = layer
+            args.wandb_project = "Othello-GPT-Resid-Mid-Probes"
+            args.cache_position = "resid_mid"
+            args.probe_name = probe
+            args.full_probe_name = f"{probe}_L{layer}"
+            args.modes = 1
+            if probe == "flipped":
+                args.get_state_stack_one_hot = get_state_stack_one_hot_flipped
+                args.options = 2
+            elif probe == "empty_yours_mine":
+                args.get_state_stack_one_hot = get_state_stack_one_hot_empty_yours_mine
+                args.options = 3
             trainer = LinearProbeTrainer(model, args)
             trainer.train()

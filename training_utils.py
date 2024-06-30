@@ -55,7 +55,9 @@ OTHELLO_MECHINT_ROOT = (OTHELLO_ROOT / "mechanistic_interpretability").resolve()
 sys.path.append(str(OTHELLO_MECHINT_ROOT))
 
 from mech_interp_othello_utils import (
-    OthelloBoardState
+    OthelloBoardState,
+    to_string,
+    to_int,
 )
 
 # Load board data as ints (i.e. 0 to 60)
@@ -76,6 +78,31 @@ FLIPPED = 2
 PLAYED_BLACK = 3
 PLAYED_WHITE = 4
 UNAFFECTED = 5
+
+EMPTY = 0
+YOURS = 1
+MINE = 2
+
+from typing import List, Tuple
+
+def get_state_stack_empty_yours_mine(games_str : Int[Tensor, "num_games len_of_game"]):
+    num_games, len_of_game = games_str.shape
+    game_states = []
+    for game_idx in range(num_games):
+        game_state = seq_to_state_stack(games_str[game_idx])
+        game_states.append(game_state)
+    game_states = t.Tensor(np.stack(game_states)) # 0 is blank, -1 is white, 1 is black
+    game_states = game_states.to(t.long)
+    assert game_states.shape == (num_games, len_of_game, rows, cols)
+    game_states[:, 1::2] *= -1 # 0 blank, 1 mine, -1 theirs
+    game_states[game_states == 1] = MINE # 2
+    game_states[game_states == -1] = YOURS # 1
+    return game_states # 0 empty, 1 yours, 2 mine
+
+def get_state_stack_one_hot_empty_yours_mine(games_str : Int[Tensor, "num_games len_of_game"]):
+    game_states = get_state_stack_empty_yours_mine(games_str)
+    game_states_one_hot = t.nn.functional.one_hot(game_states, num_classes=3).to(device)
+    return game_states_one_hot
 
 def state_stack_to_one_hot(state_stack):
     '''
