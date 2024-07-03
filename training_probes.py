@@ -42,7 +42,16 @@ from tqdm import tqdm
 
 import wandb
 
-from training_utils import get_state_stack_one_hot_flipped, get_state_stack_one_hot_num_flipped, get_state_stack_one_hot_even_odd_flipped, get_state_stack_one_hot_first_tile_places_black_white, get_state_stack_one_hot_first_tile_places_mine_theirs, get_state_stack_one_hot_empty_yours_mine
+from training_utils import (
+    get_state_stack_one_hot_flipped,
+    get_state_stack_one_hot_num_flipped,
+    get_state_stack_one_hot_even_odd_flipped,
+    get_state_stack_one_hot_first_tile_places_black_white,
+    get_state_stack_one_hot_first_tile_places_mine_theirs,
+    get_state_stack_one_hot_empty_yours_mine,
+    get_state_stack_one_hot_placed_and_flipped,
+    get_state_stack_one_hot_placed_and_flipped_stripe,
+    get_state_stack_one_hot_placed)
 
 device = t.device("cuda" if t.cuda.is_available() else "cpu")
 print(f"device: {device}")
@@ -121,7 +130,7 @@ class ProbeTrainingArgs():
         num_games_val: int = 0
         num_games_test: int = 0
     else:
-        num_games_train: int = 200000
+        num_games_train: int = 80000
         num_games_val: int = 0
         num_games_test: int = 0
 
@@ -151,6 +160,8 @@ class ProbeTrainingArgs():
     has_bias = False
 
     cache_position = "resid_post"
+
+    multi_label = False
     
 
     # Code to get randomly initialized probe
@@ -194,6 +205,7 @@ class LinearProbeTrainer:
         state_stack_one_hot = args.get_state_stack_one_hot(games_str).to(device)
         assert state_stack_one_hot.shape == (batch_size, 60, 8, 8, options)
         state_stack_one_hot = state_stack_one_hot[:, args.pos_start:args.pos_end, :, :, :]
+        state_stack_one_hot = state_stack_one_hot.to(dtype=t.long)
 
         # games_int = tensor of game sequences, each of length 60
         # This is the input to our model
@@ -201,7 +213,7 @@ class LinearProbeTrainer:
 
         # state_stack_one_hot = tensor of one-hot encoded states for each game
         # We'll multiply this by our probe's estimated log probs along the `options` dimension, to get probe's estimated log probs for the correct option
-        assert isinstance(state_stack_one_hot, Int[Tensor, f"batch={batch_size} game_len={game_len} rows=8 cols=8 options={options}"])
+        assert isinstance(state_stack_one_hot, Int[Tensor, f"batch={batch_size} game_len={args.pos_end - args.pos_start} rows=8 cols=8 options={options}"])
 
         # SOLUTION
         with t.inference_mode():
@@ -219,8 +231,11 @@ class LinearProbeTrainer:
         )
         if self.args.has_bias:
             probe_out += einops.rearrange(self.bias, 'modes rows cols options -> modes 1 1 rows cols options')
-
-        probe_log_probs = probe_out.log_softmax(-1)
+        
+        if not args.multi_label:
+            probe_log_probs = probe_out.log_softmax(-1)
+        else:
+            probe_log_probs = probe_out.sigmoid().log()
         probe_correct_log_probs = einops.reduce(
             probe_log_probs * state_stack_one_hot,
             "modes batch pos rows cols options -> modes pos rows cols",
@@ -262,6 +277,9 @@ class LinearProbeTrainer:
         return self.shuffle_indices(self.args.num_games_train, self.args.num_games_val)
 
     def save_linear_probe(self, path):
+        folder_path = "/".join(path.split("/")[:-1])
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
         t.save(self.linear_probe, path)
 
     def save_bias(self, path):
@@ -303,9 +321,10 @@ class LinearProbeTrainer:
 
         if not DEBUG:
             wandb.finish()
-        self.save_linear_probe(f"models2/{args.full_probe_name}.pth")
+        module_name = args.cache_position.split("_")[1]
+        self.save_linear_probe(f"probes/{module_name}/{args.probe_name}/{args.full_probe_name}.pth")
         if args.has_bias:
-            self.save_bias(f"models2/{args.full_probe_name}_bias.pth")
+            self.save_bias(f"probes/{module_name}/{args.probe_name}/{args.full_probe_name}_bias.pth")
         print("Probe Trained and Saved")
 
 if __name__ == "__main__":
@@ -348,20 +367,26 @@ if __name__ == "__main__":
             trainer = LinearProbeTrainer(model, args)
             trainer.train()'''
     args = ProbeTrainingArgs()
-    for probe in ["empty_yours_mine", "flipped"]:
-        for layer in range(8):
-            args = ProbeTrainingArgs()
-            args.layer = layer
-            args.wandb_project = "Othello-GPT-Resid-Mid-Probes"
-            args.cache_position = "resid_mid"
-            args.probe_name = probe
-            args.full_probe_name = f"{probe}_L{layer}"
-            args.modes = 1
-            if probe == "flipped":
-                args.get_state_stack_one_hot = get_state_stack_one_hot_flipped
-                args.options = 2
-            elif probe == "empty_yours_mine":
-                args.get_state_stack_one_hot = get_state_stack_one_hot_empty_yours_mine
-                args.options = 3
-            trainer = LinearProbeTrainer(model, args)
-            trainer.train()
+    for probe in ["placed_and_flipped", "placed_and_flipped_stripe", "placed"]:
+        for cache_position in ["resid_mid", "resid_post"]:
+            for layer in range(8):
+                args = ProbeTrainingArgs()
+                args.layer = layer
+                args.wandb_project = "Othello-GPT-Placed-and-Flipped-Probes"
+                args.cache_position = cache_position
+                args.probe_name = probe
+                args.full_probe_name = f"resid_{layer}_{probe}"
+                args.modes = 1
+                if probe == "placed_and_flipped":
+                    args.multi_label = True
+                    args.get_state_stack_one_hot = get_state_stack_one_hot_placed_and_flipped
+                    args.options = 8
+                elif probe == "placed_and_flipped_stripe":
+                    args.multi_label = True
+                    args.get_state_stack_one_hot = get_state_stack_one_hot_placed_and_flipped_stripe
+                    args.options = 8
+                elif probe == "placed":
+                    args.get_state_stack_one_hot = get_state_stack_one_hot_placed
+                    args.options = 2
+                trainer = LinearProbeTrainer(model, args)
+                trainer.train()

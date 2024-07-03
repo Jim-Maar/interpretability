@@ -17,6 +17,8 @@ from jinja2 import Template
 
 import os
 
+device = t.device("cuda" if t.cuda.is_available() else "cpu")
+
 # os.chdir(section_dir)
 section_dir = Path.cwd()
 assert section_dir.name == "interpretability"
@@ -29,7 +31,8 @@ from mech_interp_othello_utils import (
     OthelloBoardState,
     to_int,
     to_string,
-    string_to_label
+    string_to_label,
+    str_to_int,
 )
 
 BLANK1 = 0
@@ -66,6 +69,24 @@ def load_model(device):
 
 alpha = "ABCDEFGH"
 
+# Load Probes
+
+probes = dict()
+probe_modules = os.listdir("probes")
+for probe_module in probe_modules:
+    probe_types = os.listdir(f"probes/{probe_module}")
+    for probe_type in probe_types:
+        for layer in range(8):
+            if device.type == "cpu":
+                probe = t.load(f"probes/{probe_module}/{probe_type}/resid_{layer}_{probe_type}.pth", map_location=device).detach()
+            else:
+                probe = t.load(f"probes/{probe_module}/{probe_type}/resid_{layer}_{probe_type}.pth").to(device).detach()
+            probes[(probe_module, probe_type, layer)] = probe
+
+def get_probe(layer : Int = 5, probe_type : str = "linear", probe_module : str = "post"):
+    # assert probe_module in ["post", "mid"]
+    # assert probe_type in ["linear", "flipped"]
+    return probes[(probe_module, probe_type, layer)]
 
 def seq_to_state_stack(str_moves):
     """
@@ -157,8 +178,6 @@ def square_tuple_from_square(square : str):
 
 reverse_alpha = ["H", "G", "F", "E", "D", "C", "B", "A"]
 
-
-
 def save_plotly_to_html(fig, filename):
     TEMPLATE_PATH = "interactive_plots/template.html"
     assert os.path.exists(TEMPLATE_PATH)
@@ -185,6 +204,7 @@ def plot_boards_general(x_labels : List[str],
                         save : bool = False):
     # TODO: add attn/mlp only
     # TODO: Change Width and Height accordingly
+    boards = boards.flip(2)
     x_len, y_len, rows, cols = boards.shape
     subplot_titles = [f"{y_label}, {x_label}" for y_label in y_labels for x_label in x_labels]
     # subplot_titles = [f"P: {i}, T: {label_list[i]}, L: {j}" for i in range(vis_args.start_pos, vis_args.end_pos) for j in range(vis_args.layers)]
@@ -242,8 +262,8 @@ class VisualzeBoardArguments:
 
 def get_score_from_resid(resid, layer):
     # assert probe_name in ["linear", "flipped"]
-    linear_probe = t.load(f"probes/linear/resid_{layer}_linear.pth").detach()
-    flipped_probe = t.load(f"probes/flipped/resid_{layer}_flipped.pth").detach()
+    linear_probe = get_probe(layer, "linear", "post")
+    flipped_probe = get_probe(layer, "flipped", "post")
     assert len(resid.shape) == 2
     seq_len, d_model = resid.shape
     logits = einops.einsum(resid, linear_probe, 'pos d_model, modes d_model rows cols options -> modes pos rows cols options')[0]
@@ -259,6 +279,7 @@ def get_score_from_resid(resid, layer):
     # TODO: Add Flips as Labels...
     color_score = color_score.flip(1)
     flip_score = flipped_probs[:, :, :, [0]].flip(1).squeeze(dim=-1)
+    # flip_score = flipped_probs[:, :, :, [0]].squeeze(dim=-1)
     return color_score, flip_score
 
 def get_boards(input_int : Float[Tensor, "pos"], vis_args : VisualzeBoardArguments, model: HookedTransformer):
@@ -382,6 +403,21 @@ def str_to_tile_state(tile_state_str):
     return EMPTY if tile_state_str == "EMPTY" else YOURS if tile_state_str == "YOURS" else MINE if tile_state_str == "MINE" else FLIPPED if tile_state_str == "FLIPPED" else NOT_FLIPPED
 
 
+def label_to_tuple(label):
+    # return f"{alpha[label // 8]}{label % 8}" This but reverse
+    alhpha_ind = alpha.find(label[0])
+    return (alhpha_ind, int(label[1]))
+
+def label_to_string(label):
+    tup = label_to_tuple(label)
+    return tup[0] * 8 + tup[1]
+
+def label_to_int(label):
+    st =  label_to_string(label)
+    return str_to_int(st)
+
+
+
 if __name__ == "__main__":
     vis_args = VisualzeBoardArguments()
     vis_args.start_pos = 0
@@ -392,11 +428,14 @@ if __name__ == "__main__":
     vis_args.mode = "flipped"
     # vis_args.static_image = True
 
-    model = load_model("cuda")
+    '''model = load_model("cuda")
     _, focus_games_str = get_focus_games()
 
     clean_input_str = focus_games_str[0][:59]
-    visualize_game(clean_input_str, vis_args, model)
+    visualize_game(clean_input_str, vis_args, model)'''
+    print(label_to_int("B3"))
+    print(label_to_string("B3"))
+    print(label_to_tuple("B3"))
 
 
     

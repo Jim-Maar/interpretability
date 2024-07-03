@@ -80,8 +80,26 @@ PLAYED_WHITE = 4
 UNAFFECTED = 5
 
 EMPTY = 0
-YOURS = 1
-MINE = 2
+YOURS = 2
+MINE = 1
+
+'''FLIPPED_TOP = 3
+FLIPPED_TOP_RIGHT = 4
+FLIPPED_RIGHT = 5
+FLIPPED_BOTTOM_RIGHT = 6
+FLIPPED_BOTTOM = 7
+FLIPPED_BOTTOM_LEFT = 8
+FLIPPED_LEFT = 9
+FLIPPED_TOP_LEFT = 10'''
+
+FLIPPED_TOP = 0
+FLIPPED_TOP_RIGHT = 1
+FLIPPED_RIGHT = 2
+FLIPPED_BOTTOM_RIGHT = 3
+FLIPPED_BOTTOM = 4
+FLIPPED_BOTTOM_LEFT = 5
+FLIPPED_LEFT = 6
+FLIPPED_TOP_LEFT = 7
 
 from typing import List, Tuple
 
@@ -95,8 +113,8 @@ def get_state_stack_empty_yours_mine(games_str : Int[Tensor, "num_games len_of_g
     game_states = game_states.to(t.long)
     assert game_states.shape == (num_games, len_of_game, rows, cols)
     game_states[:, 1::2] *= -1 # 0 blank, 1 mine, -1 theirs
-    game_states[game_states == 1] = MINE # 2
-    game_states[game_states == -1] = YOURS # 1
+    game_states[game_states == -1] = YOURS # 2
+    game_states[game_states == 1] = MINE # 1
     return game_states # 0 empty, 1 yours, 2 mine
 
 def get_state_stack_one_hot_empty_yours_mine(games_str : Int[Tensor, "num_games len_of_game"]):
@@ -165,6 +183,141 @@ def seq_to_state_stack_flipped(str_moves):
     states = np.stack(states, axis=0)
     return states
 
+def seq_to_state_stack_placed_and_flipped(str_moves):
+    """
+    Collects states, where each cell mean the following:
+    0: blank
+    1: unaffected
+    2: flipped
+    3: played_black
+    4: played_white
+    """
+    if isinstance(str_moves, t.Tensor):
+        str_moves = str_moves.tolist()
+    board = OthelloBoardState()
+    states = []
+    for move_idx, move in enumerate(str_moves):
+        try:
+            flipped = board.umpire_return_flipped(move)
+        except RuntimeError:
+            breakpoint()
+
+        _state = np.copy(board.state)
+        _state[:, :] = _state[:, :] != 0
+
+        # Update Flipped cells
+        for cell in flipped:
+            _state[cell[0], cell[1]] = FLIPPED
+
+        # Update played cell
+        row, col = move // 8, move % 8
+        
+        _state_one_hot = np.zeros((8, 8, 8))
+
+        if _state[max(row-1, 0), col] == FLIPPED:
+            _state_one_hot[row, col, FLIPPED_TOP] = 1
+        if _state[max(row-1, 0), min(col+1, 7)] == FLIPPED:
+            _state_one_hot[row, col, FLIPPED_TOP_RIGHT] = 1
+        if _state[row, min(col+1, 7)] == FLIPPED:
+            _state_one_hot[row, col, FLIPPED_RIGHT] = 1
+        if _state[min(row+1, 7), min(col+1, 7)] == FLIPPED:
+            _state_one_hot[row, col, FLIPPED_BOTTOM_RIGHT] = 1
+        if _state[min(row+1, 7), col] == FLIPPED:
+            _state_one_hot[row, col, FLIPPED_BOTTOM] = 1
+        if _state[min(row+1, 7), max(col-1, 0)] == FLIPPED:
+            _state_one_hot[row, col, FLIPPED_BOTTOM_LEFT] = 1
+        if _state[row, max(col-1, 0)] == FLIPPED:
+            _state_one_hot[row, col, FLIPPED_LEFT] = 1
+        if _state[max(row-1, 0), max(col-1, 0)] == FLIPPED:
+            _state_one_hot[row, col, FLIPPED_TOP_LEFT] = 1
+
+        states.append(_state_one_hot)
+    states = np.stack(states, axis=0)
+    return states
+
+def get_diagonal(y, x, up : bool):
+    if up:
+        return [(y - i, x + i) for i in range(max(-x, y - 7), min(y, 7 - x) + 1)]
+    else:
+        return [(y + i, x + i) for i in range(max(-x, -y), min(7 - y, 7 - x) + 1)]
+
+def seq_to_state_stack_placed_and_flipped_stripe(str_moves):
+    """
+    Collects states, where each cell mean the following:
+    0: blank
+    1: unaffected
+    2: flipped
+    3: played_black
+    4: played_white
+    """
+    if isinstance(str_moves, t.Tensor):
+        str_moves = str_moves.tolist()
+    board = OthelloBoardState()
+    states = []
+    for move_idx, move in enumerate(str_moves):
+        try:
+            flipped = board.umpire_return_flipped(move)
+        except RuntimeError:
+            breakpoint()
+
+        _state = np.copy(board.state)
+        _state[:, :] = _state[:, :] != 0
+
+        # Update Flipped cells
+        for cell in flipped:
+            _state[cell[0], cell[1]] = FLIPPED
+
+        # Update played cell
+        row, col = move // 8, move % 8
+
+        _state_one_hot = np.zeros((8, 8, 8))
+        diagonal_up = get_diagonal(row, col, up=True)
+        diagonal_down = get_diagonal(row, col, up=False)
+
+        if _state[max(row-1, 0), col] == FLIPPED:
+            _state_one_hot[:, col, FLIPPED_TOP] = 1
+        if _state[max(row-1, 0), min(col+1, 7)] == FLIPPED:
+            for y, x in diagonal_up:
+                _state_one_hot[y, x, FLIPPED_TOP_RIGHT] = 1
+        if _state[row, min(col+1, 7)] == FLIPPED:
+            _state_one_hot[row, :, FLIPPED_RIGHT] = 1
+        if _state[min(row+1, 7), min(col+1, 7)] == FLIPPED:
+            for y, x in diagonal_down:
+                _state_one_hot[y, x, FLIPPED_BOTTOM_RIGHT] = 1
+        if _state[min(row+1, 7), col] == FLIPPED:
+            _state_one_hot[:, col, FLIPPED_BOTTOM] = 1
+        if _state[min(row+1, 7), max(col-1, 0)] == FLIPPED:
+            for y, x in diagonal_up:
+                _state_one_hot[y, x, FLIPPED_BOTTOM_LEFT] = 1
+            _state_one_hot[row, col, FLIPPED_BOTTOM_LEFT] = 1
+        if _state[row, max(col-1, 0)] == FLIPPED:
+            _state_one_hot[row, :, FLIPPED_LEFT] = 1
+        if _state[max(row-1, 0), max(col-1, 0)] == FLIPPED:
+            for y, x in diagonal_up:
+                _state_one_hot[y, x, FLIPPED_TOP_LEFT] = 1
+
+        states.append(_state_one_hot)
+    states = np.stack(states, axis=0)
+    return states
+
+'''
+if _state[max(row-1, 0), col] == FLIPPED:
+    _state[max(row-1, 0), col] = FLIPPED_BOTTOM
+if _state[max(row-1, 0), min(col+1, 7)] == FLIPPED:
+    _state[max(row-1, 0), min(col+1, 7)] = FLIPPED_BOTTOM_LEFT
+if _state[row, min(col+1, 7)] == FLIPPED:
+    _state[row, min(col+1, 7)] = FLIPPED_LEFT
+if _state[min(row+1, 7), min(col+1, 7)] == FLIPPED:
+    _state[min(row+1, 7), min(col+1, 7)] = FLIPPED_TOP_LEFT
+if _state[min(row+1, 7), col] == FLIPPED:
+    _state[min(row+1, 7), col] = FLIPPED_TOP
+if _state[min(row+1, 7), max(col-1, 0)] == FLIPPED:
+    _state[min(row+1, 7), max(col-1, 0)] = FLIPPED_TOP_RIGHT
+if _state[row, max(col-1, 0)] == FLIPPED:
+    _state[row, max(col-1, 0)] = FLIPPED_RIGHT
+if _state[max(row-1, 0), max(col-1, 0)] == FLIPPED:
+    _state[max(row-1, 0), max(col-1, 0)] = FLIPPED_BOTTOM_RIGHT
+'''
 
 def build_state_stack_flipped(board_seqs_string):
     """
@@ -194,24 +347,91 @@ def state_stack_to_one_hot_flipped(state_stack):
     one_hot[..., 1] = 1 - one_hot[..., 0]
     return one_hot
 
+def state_stack_to_one_hot_placed(state_stack):
+    one_hot = t.zeros(
+        state_stack.shape[0],
+        state_stack.shape[1],
+        8,  # rows
+        8,  # cols
+        2,  # options
+        device=state_stack.device,
+        dtype=t.int,
+    )  # [batch_size, 59, 8, 8, 4]
 
-# This function takes game indeces as input and returns a tensor of shape (games, moves, rows=8, cols=8, flipped=2)
-def get_state_stack_one_hot_flipped(games_str : Int[Tensor, "num_games len_of_game"]):
+    # Flipped
+    one_hot[..., 0] = (state_stack == PLAYED_BLACK) | (state_stack == PLAYED_WHITE)
+    one_hot[..., 1] = 1 - one_hot[..., 0]
+    return one_hot
+
+'''def state_stack_to_one_hot_placed_and_flipped(state_stack):
+    one_hot = t.zeros(
+        state_stack.shape[0],
+        state_stack.shape[1],
+        8,  # rows
+        8,  # cols
+        9,  # options
+        device=state_stack.device,
+        dtype=t.int,
+    )  # [batch_size, 59, 8, 8, 4]
+
+    # Flipped
+    one_hot[..., 0] = state_stack < 3
+    one_hot[..., 1] = state_stack == FLIPPED_TOP
+    one_hot[..., 2] = state_stack == FLIPPED_TOP_RIGHT
+    one_hot[..., 3] = state_stack == FLIPPED_RIGHT
+    one_hot[..., 4] = state_stack == FLIPPED_BOTTOM_RIGHT
+    one_hot[..., 5] = state_stack == FLIPPED_BOTTOM
+    one_hot[..., 6] = state_stack == FLIPPED_BOTTOM_LEFT
+    one_hot[..., 7] = state_stack == FLIPPED_LEFT
+    one_hot[..., 8] = state_stack == FLIPPED_TOP_LEFT
+    return one_hot'''
+
+def get_state_stack_one_hot_general(get_state_stack_specific, state_stack_to_one_hot_specific):
+    def get_state_stack_one_hot(games_str : Int[Tensor, "num_games len_of_game"]):
+        state_stacks = []
+        for batch in range(games_str.shape[0]):
+            state_stack = get_state_stack_specific(games_str[batch])
+            state_stacks.append(state_stack)
+        state_stack = t.Tensor(np.stack(state_stacks))
+        state_stack_one_hot = state_stack_to_one_hot_specific(
+            state_stack
+        ).cuda()
+        return state_stack_one_hot
+    return get_state_stack_one_hot
+
+def get_state_stack_one_hot_placed_and_flipped(games_str : Int[Tensor, "num_games len_of_game"]):
+    state_stacks_one_hot = []
+    for batch in range(games_str.shape[0]):
+        state_stack = seq_to_state_stack_placed_and_flipped(games_str[batch])
+        state_stacks_one_hot.append(state_stack)
+    state_stacks_one_hot = t.Tensor(np.stack(state_stacks_one_hot)).cuda()
+    return state_stacks_one_hot
+
+def get_state_stack_one_hot_placed_and_flipped_stripe(games_str : Int[Tensor, "num_games len_of_game"]):
+    state_stacks_one_hot = []
+    for batch in range(games_str.shape[0]):
+        state_stack = seq_to_state_stack_placed_and_flipped_stripe(games_str[batch])
+        state_stacks_one_hot.append(state_stack)
+    state_stacks_one_hot = t.Tensor(np.stack(state_stacks_one_hot)).cuda()
+    return state_stacks_one_hot
+
+# Create all the get_state_stack_one_hot_... functions below using teh get_state_stack_one_hot_general function
+# get_state_stack_one_hot = get_state_stack_one_hot_general(get_state_stack_empty_yours_mine, state_stack_to_one_hot)
+get_state_stack_one_hot_flipped = get_state_stack_one_hot_general(build_state_stack_flipped, state_stack_to_one_hot_flipped)
+get_state_stack_one_hot_placed = get_state_stack_one_hot_general(seq_to_state_stack_flipped, state_stack_to_one_hot_placed)
+# get_state_stack_one_hot_placed_and_flipped = get_state_stack_one_hot_general(seq_to_state_stack_placed_and_flipped, state_stack_to_one_hot_placed_and_flipped)
+# get_state_stack_one_hot_num_flipped = get_state_stack_one_hot_general(get_state_stack_num_flipped, state_stack_to_one_hot_flipped)
+
+'''def get_state_stack_one_hot_flipped(games_str : Int[Tensor, "num_games len_of_game"]):
     """
     Returns a tensor of shape (games, moves, rows=8, cols=8, flipped=2) where the last dimension is a one-hot encoding
     of whether the tile was flipped or not.
     """
-    # state_stack.shape == (num_games, moves, rows, cols)
-    # state_stack = t.stack([t.tensor(seq_to_state_stack(game_str.tolist())) for game_str in games_str])
-    # state_stack = state_stack[:, args.pos_start: args.pos_end, :, :]
-    #state_stack_one_hot = state_stack_to_one_hot(state_stack).to(device)
     state_stack = build_state_stack_flipped(games_str)
-    # state_stack = state_stack[:, args.pos_start:args.pos_end, :, :]
     state_stack_one_hot = state_stack_to_one_hot_flipped(
         state_stack
     ).cuda()
-    return state_stack_one_hot
-
+    return state_stack_one_hot'''
 
 def get_state_stack_num_flipped(games_str : Int[Tensor, "num_games len_of_game"]):
     state_stack = build_state_stack_flipped(games_str)
