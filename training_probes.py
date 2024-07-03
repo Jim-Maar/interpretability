@@ -367,8 +367,8 @@ if __name__ == "__main__":
             trainer = LinearProbeTrainer(model, args)
             trainer.train()'''
     args = ProbeTrainingArgs()
-    for probe in ["placed_and_flipped", "placed_and_flipped_stripe", "placed"]:
-        for cache_position in ["resid_mid", "resid_post"]:
+    for probe in ["linear"]:
+        for cache_position in ["resid_mid"]:
             for layer in range(8):
                 args = ProbeTrainingArgs()
                 args.layer = layer
@@ -388,5 +388,8 @@ if __name__ == "__main__":
                 elif probe == "placed":
                     args.get_state_stack_one_hot = get_state_stack_one_hot_placed
                     args.options = 2
+                elif probe == "linear":
+                    args.get_state_stack_one_hot = get_state_stack_one_hot_empty_yours_mine
+                    args.options = 3
                 trainer = LinearProbeTrainer(model, args)
                 trainer.train()
