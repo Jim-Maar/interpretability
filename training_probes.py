@@ -68,6 +68,8 @@ OTHELLO_MECHINT_ROOT = (OTHELLO_ROOT / "mechanistic_interpretability").resolve()
 
 sys.path.append(str(OTHELLO_MECHINT_ROOT))
 
+EPSILON = 1e-8
+
 DEBUG = False
 if DEBUG:
     DATASET = "small"
@@ -130,7 +132,7 @@ class ProbeTrainingArgs():
         num_games_val: int = 0
         num_games_test: int = 0
     else:
-        num_games_train: int = 80000
+        num_games_train: int = 1000000
         num_games_val: int = 0
         num_games_test: int = 0
 
@@ -235,7 +237,7 @@ class LinearProbeTrainer:
         if not args.multi_label:
             probe_log_probs = probe_out.log_softmax(-1)
         else:
-            probe_log_probs = probe_out.sigmoid().log()
+            probe_log_probs = (probe_out.sigmoid() + EPSILON).log()
         probe_correct_log_probs = einops.reduce(
             probe_log_probs * state_stack_one_hot,
             "modes batch pos rows cols options -> modes pos rows cols",
@@ -367,9 +369,9 @@ if __name__ == "__main__":
             trainer = LinearProbeTrainer(model, args)
             trainer.train()'''
     args = ProbeTrainingArgs()
-    for probe in ["linear"]:
-        for cache_position in ["resid_mid"]:
-            for layer in range(8):
+    for probe in ["placed_and_flipped"]:
+        for cache_position in ["resid_post", "resid_mid"]:
+            for layer in [0, 1, 2, 3, 4, 5, 6, 7]:
                 args = ProbeTrainingArgs()
                 args.layer = layer
                 args.wandb_project = "Othello-GPT-Placed-and-Flipped-Probes"

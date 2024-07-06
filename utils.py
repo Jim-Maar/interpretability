@@ -46,6 +46,18 @@ MINE = 2
 FLIPPED = 0
 NOT_FLIPPED = 1
 
+PLACED = 0
+NOT_PLACED = 1
+
+FLIPPED_TOP = 0
+FLIPPED_TOP_RIGHT = 1
+FLIPPED_RIGHT = 2
+FLIPPED_BOTTOM_RIGHT = 3
+FLIPPED_BOTTOM = 4
+FLIPPED_BOTTOM_LEFT = 5
+FLIPPED_LEFT = 6
+FLIPPED_TOP_LEFT = 7
+
 # Load Model
 def load_model(device):
     cfg = HookedTransformerConfig(
@@ -87,6 +99,87 @@ def get_probe(layer : Int = 5, probe_type : str = "linear", probe_module : str =
     # assert probe_module in ["post", "mid"]
     # assert probe_type in ["linear", "flipped"]
     return probes[(probe_module, probe_type, layer)]
+
+probe_directions = {
+    "linear": {
+        "empty" : EMPTY,
+        "yours" : YOURS,
+        "mine" : MINE, 
+    },
+    "flipped": {
+        "flipped" : FLIPPED,
+        "not_flipped" : NOT_FLIPPED,
+    },
+    "placed" : {
+        "placed" : PLACED,
+        "not_placed" : NOT_PLACED,
+    },
+    "placed_and_flipped" : {
+        "top" : FLIPPED_TOP,
+        "top_right" : FLIPPED_TOP_RIGHT,
+        "right" : FLIPPED_RIGHT,
+        "bottom_right" : FLIPPED_BOTTOM_RIGHT,
+        "bottom" : FLIPPED_BOTTOM,
+        "bottom_left" : FLIPPED_BOTTOM_LEFT,
+        "left" : FLIPPED_LEFT,
+        "top_left" : FLIPPED_TOP_LEFT,
+    },
+    "placed_and_flipped_stripe" : {
+        "top" : FLIPPED_TOP,
+        "top_right" : FLIPPED_TOP_RIGHT,
+        "right" : FLIPPED_RIGHT,
+        "bottom_right" : FLIPPED_BOTTOM_RIGHT,
+        "bottom" : FLIPPED_BOTTOM,
+        "bottom_left" : FLIPPED_BOTTOM_LEFT,
+        "left" : FLIPPED_LEFT,
+        "top_left" : FLIPPED_TOP_LEFT,
+    }
+}
+
+probe_directions_list = {
+    k : list(v.keys()) for k, v in probe_directions.items()
+}
+
+short_cuts = {
+    "empty" : "E",
+    "yours" : "Y",
+    "mine" : "M",
+    "flipped" : "F",
+    "not_flipped" : "NF",
+    "placed" : "P",
+    "not_placed" : "NP",
+    "top" : "T",
+    "top_right" : "TR",
+    "right" : "R",
+    "bottom_right" : "BR",
+    "bottom" : "B",
+    "bottom_left" : "BL",
+    "left" : "L",
+    "top_left" : "TL",
+    "linear" : "L",
+    "placed_and_flipped" : "PF",
+    "placed_and_flipped_stripe" : "PFS",
+}
+
+def get_short_cut(name):
+    return short_cuts[name]
+
+def get_probe_names():
+    return list(probe_directions.keys())
+
+def get_direction_str(direction_int):
+    for probe_name in probe_directions:
+        for direction_str in probe_directions[probe_name]:
+            if probe_directions[probe_name][direction_str] == direction_int:
+                return direction_str
+    assert(False)
+
+def get_direction_int(directions_str):
+    directions_str = directions_str.lower()
+    for probe_name in probe_directions:
+        if directions_str in probe_directions[probe_name]:
+            return probe_directions[probe_name][directions_str]
+    assert(False)
 
 def seq_to_state_stack(str_moves):
     """
@@ -209,7 +302,7 @@ def plot_boards_general(x_labels : List[str],
     subplot_titles = [f"{y_label}, {x_label}" for y_label in y_labels for x_label in x_labels]
     # subplot_titles = [f"P: {i}, T: {label_list[i]}, L: {j}" for i in range(vis_args.start_pos, vis_args.end_pos) for j in range(vis_args.layers)]
     width = x_len * size_of_board
-    height = y_len * size_of_board
+    height = y_len * size_of_board + margin_t
     vertical_spacing = 70 / height
     fig = make_subplots(rows=y_len, cols=x_len, subplot_titles=subplot_titles, vertical_spacing=vertical_spacing)
     boards_min = boards.min().item()
@@ -395,14 +488,6 @@ def visualize_game(input_str, vis_args: VisualzeBoardArguments, model: HookedTra
     plot_boards(label_list, boards, flip_boards, vis_args)
 
 
-def tile_state_to_str(tile_state):
-    return "EMPTY" if tile_state == EMPTY else "YOURS" if tile_state == YOURS else "MINE"
-
-def str_to_tile_state(tile_state_str):
-    tile_state_str = tile_state_str.upper()
-    return EMPTY if tile_state_str == "EMPTY" else YOURS if tile_state_str == "YOURS" else MINE if tile_state_str == "MINE" else FLIPPED if tile_state_str == "FLIPPED" else NOT_FLIPPED
-
-
 def label_to_tuple(label):
     # return f"{alpha[label // 8]}{label % 8}" This but reverse
     alhpha_ind = alpha.find(label[0])
@@ -426,16 +511,17 @@ if __name__ == "__main__":
     vis_args.include_attn_only = False
     vis_args.include_mlp_only = False
     vis_args.mode = "flipped"
-    # vis_args.static_image = True
+    vis_args.static_image = True
 
-    '''model = load_model("cuda")
+    model = load_model("cuda")
     _, focus_games_str = get_focus_games()
 
-    clean_input_str = focus_games_str[0][:59]
-    visualize_game(clean_input_str, vis_args, model)'''
+    clean_input_str = focus_games_str[0][:1]
+    visualize_game(clean_input_str, vis_args, model)
+    '''
     print(label_to_int("B3"))
     print(label_to_string("B3"))
-    print(label_to_tuple("B3"))
+    print(label_to_tuple("B3"))'''
 
 
     
