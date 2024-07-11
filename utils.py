@@ -1,23 +1,41 @@
-import transformer_lens.utils
-from transformer_lens import HookedTransformer, HookedTransformerConfig, FactoredMatrix, ActivationCache
-from plotly_utils import imshow
-import einops
-import sys
-from pathlib import Path
-import numpy as np
+import os, sys
+chapter = "chapter1_transformer_interp"
+repo = "ARENA_3.0"
+chapter_dir = r"./" if chapter in os.listdir() else os.getcwd().split(chapter)[0]
+sys.path.append(chapter_dir + f"{chapter}/exercises")
 
+os.environ["ACCELERATE_DISABLE_RICH"] = "1"
 import torch as t
-from jaxtyping import Float, Int, Bool, Shaped, jaxtyped
+from torch import Tensor
+import numpy as np
+import einops
+from ipywidgets import interact
+import plotly.express as px
+from pathlib import Path
+import itertools
+import random
+from IPython.display import display
 from typing import List, Union, Optional, Tuple, Callable, Dict
+import typeguard
+from functools import partial
+# from torcheval.metrics.functional import multiclass_f1_score
+from sklearn.metrics import f1_score as multiclass_f1_score
+import dataclasses
+import transformer_lens
+import transformer_lens.utils as utils
+from transformer_lens.hook_points import HookedRootModule, HookPoint
+from transformer_lens import HookedTransformer, HookedTransformerConfig, FactoredMatrix, ActivationCache
+from tqdm.notebook import tqdm
+from dataclasses import dataclass
+from rich import print as rprint
+import pandas as pd
+
+from plotly_utils import imshow
+from pathlib import Path
+from typing import List, Union, Optional, Tuple, Callable, Dict
+from jaxtyping import Float, Int, Bool, Shaped, jaxtyped
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-from torch import Tensor
-from dataclasses import dataclass
-from jinja2 import Template
-
-import os
-
-device = t.device("cuda" if t.cuda.is_available() else "cpu")
 
 # os.chdir(section_dir)
 section_dir = Path.cwd()
@@ -34,6 +52,58 @@ from mech_interp_othello_utils import (
     string_to_label,
     str_to_int,
 )
+
+t.manual_seed(42)
+
+device = t.device("cuda" if t.cuda.is_available() else "cpu")
+
+MAIN = __name__ == "__main__"
+
+cfg = HookedTransformerConfig(
+    n_layers = 8,
+    d_model = 512,
+    d_head = 64,
+    n_heads = 8,
+    d_mlp = 2048,
+    d_vocab = 61,
+    n_ctx = 59,
+    act_fn="gelu",
+    normalization_type="LNPre",
+    device=device,
+)
+model = HookedTransformer(cfg)
+
+sd = utils.download_file_from_hf("NeelNanda/Othello-GPT-Transformer-Lens", "synthetic_model.pth")
+# champion_ship_sd = utils.download_file_from_hf("NeelNanda/Othello-GPT-Transformer-Lens", "championship_model.pth")
+model.load_state_dict(sd)
+
+board_seqs_int = t.tensor(np.load(OTHELLO_MECHINT_ROOT / "board_seqs_int_small.npy"), dtype=t.long)
+board_seqs_string = t.tensor(np.load(OTHELLO_MECHINT_ROOT / "board_seqs_string_small.npy"), dtype=t.long)
+assert all([middle_sq not in board_seqs_string for middle_sq in [27, 28, 35, 36]])
+assert board_seqs_int.max() == 60
+num_games, length_of_game = board_seqs_int.shape
+# Define possible indices (excluding the four center squares)
+stoi_indices = [i for i in range(64) if i not in [27, 28, 35, 36]]
+# Define our rows, and the function that converts an index into a (row, column) label, e.g. `E2`
+alpha = "ABCDEFGH"
+def to_board_label(i):
+    return f"{alpha[i//8]}{i%8}"
+# Get our list of board labels
+board_labels = list(map(to_board_label, stoi_indices))
+full_board_labels = list(map(to_board_label, range(64)))
+# start = 30000
+start = 0
+num_games = 200
+focus_games_int = board_seqs_int[start : start + num_games]
+focus_games_string = board_seqs_string[start: start + num_games]
+focus_logits, focus_cache = model.run_with_cache(focus_games_int[:, :-1].to(device))
+focus_logits.shape
+def one_hot(list_of_ints, num_classes=64):
+    out = t.zeros((num_classes,), dtype=t.float32)
+    out[list_of_ints] = 1.
+    return out
+focus_states = np.zeros((num_games, 60, 8, 8), dtype=np.float32)
+focus_valid_moves = t.zeros((num_games, 60, 64), dtype=t.float32)
 
 BLANK1 = 0
 BLACK = 1
@@ -345,6 +415,7 @@ class VisualzeBoardArguments:
     include_attn_only = False
     include_mlp_only = False
     include_pre_resid = False
+    include_layer_norm = False
     start_pos=0
     end_pos=59
     layers=8
@@ -379,7 +450,7 @@ def get_boards(input_int : Float[Tensor, "pos"], vis_args : VisualzeBoardArgumen
     _, cache = model.run_with_cache(input_int)
     boards = []
     flip_boards = []
-    for layer in range(8):
+    for layer in range(vis_args.layers):
         color_scores = []
         flip_scores = []
         resid = cache["resid_post", layer][0].detach()
@@ -398,6 +469,16 @@ def get_boards(input_int : Float[Tensor, "pos"], vis_args : VisualzeBoardArgumen
             flip_scores += [flip_score]
         if vis_args.include_mlp_only:
             resid = cache["resid_post", layer][0].detach() - t.stack([cache["attn_out", l][0].detach() for l in range(layer, layer + 1)]).sum(dim=0) - cache["resid_pre", layer][0].detach()
+            color_score, flip_score = get_score_from_resid(resid, layer)
+            color_scores += [color_score]
+            flip_scores += [flip_score]
+        if vis_args.include_layer_norm:
+            resid = cache[f"blocks.{layer+1}.ln1.hook_normalized"][0].detach()
+            color_score, flip_score = get_score_from_resid(resid, layer)
+            color_scores += [color_score]
+            flip_scores += [flip_score]
+        if vis_args.include_layer_norm:
+            resid = cache[f"blocks.{layer+1}.ln2.hook_normalized"][0].detach()
             color_score, flip_score = get_score_from_resid(resid, layer)
             color_scores += [color_score]
             flip_scores += [flip_score]
@@ -427,6 +508,9 @@ def plot_boards(label_list: List[str], boards : Float[Tensor, "layers mode pos r
         modes += ["A"]
     if vis_args.include_mlp_only:
         modes += ["M"]
+    if vis_args.include_layer_norm:
+        modes += ["L1"]
+        modes += ["L2"]
     subplot_titles = [f"P: {i}, T: {label_list[i]}, L: {j}, M: {mode}" for i in range(vis_args.start_pos, vis_args.end_pos) for mode in modes for j in range(vis_args.layers)]
     # subplot_titles = [f"P: {i}, T: {label_list[i]}, L: {j}" for i in range(vis_args.start_pos, vis_args.end_pos) for j in range(vis_args.layers)]
     width = vis_args.layers * vis_args.size_of_board
@@ -510,13 +594,14 @@ if __name__ == "__main__":
     vis_args.layers = 6
     vis_args.include_attn_only = False
     vis_args.include_mlp_only = False
+    vis_args.include_layer_norm = True
     vis_args.mode = "flipped"
     vis_args.static_image = True
 
     model = load_model("cuda")
     _, focus_games_str = get_focus_games()
 
-    clean_input_str = focus_games_str[0][:1]
+    clean_input_str = focus_games_str[0][:30]
     visualize_game(clean_input_str, vis_args, model)
     '''
     print(label_to_int("B3"))
