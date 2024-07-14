@@ -93,7 +93,7 @@ board_labels = list(map(to_board_label, stoi_indices))
 full_board_labels = list(map(to_board_label, range(64)))
 # start = 30000
 start = 0
-num_games = 200
+num_games = 50
 focus_games_int = board_seqs_int[start : start + num_games]
 focus_games_string = board_seqs_string[start: start + num_games]
 focus_logits, focus_cache = model.run_with_cache(focus_games_int[:, :-1].to(device))
@@ -237,11 +237,10 @@ def get_short_cut(name):
 def get_probe_names():
     return list(probe_directions.keys())
 
-def get_direction_str(direction_int):
-    for probe_name in probe_directions:
-        for direction_str in probe_directions[probe_name]:
-            if probe_directions[probe_name][direction_str] == direction_int:
-                return direction_str
+def get_direction_str(probe_name, direction_int):
+    for direction_str in probe_directions[probe_name]:
+        if probe_directions[probe_name][direction_str] == direction_int:
+            return direction_str
     assert(False)
 
 def get_direction_int(directions_str):
@@ -315,6 +314,11 @@ def square_to_tuple(square, is_int=False):
 
 def to_board_label(i):
     return f"{alpha[i//8]}{i%8}"
+
+def tuple_to_label(t):
+    row = t[0]
+    col = t[1]
+    return f"{alpha[row]}{col}"
 
 def get_focus_games(model = None, device = "cpu"):
     # Load board data as ints (i.e. 0 to 60)
