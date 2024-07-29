@@ -37,6 +37,8 @@ from jaxtyping import Float, Int, Bool, Shaped, jaxtyped
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+from jinja2 import Template
+
 # os.chdir(section_dir)
 section_dir = Path.cwd()
 assert section_dir.name == "interpretability"
