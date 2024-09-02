@@ -78,7 +78,6 @@ model = HookedTransformer(cfg)
 sd = utils.download_file_from_hf("NeelNanda/Othello-GPT-Transformer-Lens", "synthetic_model.pth")
 # champion_ship_sd = utils.download_file_from_hf("NeelNanda/Othello-GPT-Transformer-Lens", "championship_model.pth")
 model.load_state_dict(sd)
-
 board_seqs_int = t.tensor(np.load(OTHELLO_MECHINT_ROOT / "board_seqs_int_small.npy"), dtype=t.long)
 board_seqs_string = t.tensor(np.load(OTHELLO_MECHINT_ROOT / "board_seqs_string_small.npy"), dtype=t.long)
 assert all([middle_sq not in board_seqs_string for middle_sq in [27, 28, 35, 36]])
@@ -94,12 +93,14 @@ def to_board_label(i):
 board_labels = list(map(to_board_label, stoi_indices))
 full_board_labels = list(map(to_board_label, range(64)))
 # start = 30000
-start = 0
-num_games = 150
-focus_games_int = board_seqs_int[start : start + num_games]
-focus_games_string = board_seqs_string[start: start + num_games]
-focus_logits, focus_cache = model.run_with_cache(focus_games_int[:, :-1].to(device))
-focus_logits.shape
+def get_focus_logits_and_cache():
+    start = 0
+    num_games = 50
+    focus_games_int = board_seqs_int[start : start + num_games]
+    focus_games_string = board_seqs_string[start: start + num_games]
+    focus_logits, focus_cache = model.run_with_cache(focus_games_int[:, :-1].to(device))
+    return focus_logits, focus_cache
+# focus_logits.shape
 def one_hot(list_of_ints, num_classes=64):
     out = t.zeros((num_classes,), dtype=t.float32)
     out[list_of_ints] = 1.
@@ -332,7 +333,7 @@ def get_focus_games(model = None, device = "cpu"):
     assert board_seqs_int.max() == 60
 
     num_games, length_of_game = board_seqs_int.shape
-    start = 30000
+    start = 0
     num_games = 50
     focus_games_int = board_seqs_int[start : start + num_games]
     focus_games_string = board_seqs_string[start: start + num_games]
