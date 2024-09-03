@@ -4,3 +4,6 @@ slurm
 other
 __pycache__
 neuron_predictors
+saes
+checkpoints
+mats_experiments/checkpoints
