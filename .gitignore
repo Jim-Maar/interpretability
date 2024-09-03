@@ -7,3 +7,4 @@ neuron_predictors
 saes
 checkpoints
 mats_experiments/checkpoints
+mats_experiments/sparse_autoencoder.pt
