@@ -131,6 +131,12 @@ FLIPPED_BOTTOM_LEFT = 5
 FLIPPED_LEFT = 6
 FLIPPED_TOP_LEFT = 7
 
+ACCESIBLE = 0
+NOT_ACCESIBLE = 1
+
+LEGAL = 0
+NOT_LEGAL = 1
+
 # Load Model
 def load_model(device):
     cfg = HookedTransformerConfig(
@@ -190,6 +196,14 @@ probe_directions = {
         "placed" : PLACED,
         "not_placed" : NOT_PLACED,
     },
+    "accesible" : {
+        "accesible" : ACCESIBLE,
+        "not_accesible" : NOT_ACCESIBLE,
+    },
+    "legal" : {
+        "legal" : LEGAL,
+        "not_legal" : NOT_LEGAL,
+    },
     "placed_and_flipped" : {
         "top" : FLIPPED_TOP,
         "top_right" : FLIPPED_TOP_RIGHT,
@@ -224,6 +238,10 @@ short_cuts = {
     "not_flipped" : "NF",
     "placed" : "P",
     "not_placed" : "NP",
+    "accesible" : "A",
+    "not_accesible" : "NA",
+    "legal" : "L",
+    "not_legal" : "NL",
     "top" : "T",
     "top_right" : "TR",
     "right" : "R",
