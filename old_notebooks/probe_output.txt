@@ -1,0 +1,231 @@
+/hpi/fs00/home/jim.maar/miniconda3/envs/othello-env/lib/python3.11/site-packages/accelerate/utils/imports.py:274: UserWarning: `ACCELERATE_DISABLE_RICH` is deprecated and will be removed in v0.22.0 and deactivated by default. Please use `ACCELERATE_ENABLE_RICH` if you wish to use `rich`.
+  warnings.warn(
+wandb: Currently logged in as: jim-maar (feedback2code). Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.18.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.13.10
+wandb: Run data is saved locally in /hpi/fs00/home/jim.maar/interpretability/wandb/run-20240912_132939-sxsh0gu5
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run Othello-GPT probe evaluation
+wandb: ⭐️ View project at https://wandb.ai/feedback2code/Othello-GPT%20probe%20evaluation%20test
+wandb: 🚀 View run at https://wandb.ai/feedback2code/Othello-GPT%20probe%20evaluation%20test/runs/sxsh0gu5
+accesible
+  0%|          | 0/20 [00:00<?, ?it/s]
+placed
+  0%|          | 0/20 [00:00<?, ?it/s]
+flipped
+  0%|          | 0/20 [00:00<?, ?it/s]
+linear
+  0%|          | 0/20 [00:00<?, ?it/s]
+legal
+  0%|          | 0/20 [00:00<?, ?it/s]
+accesible
+  0%|          | 0/20 [00:00<?, ?it/s]
+placed
+  0%|          | 0/20 [00:00<?, ?it/s]
+flipped
+  0%|          | 0/20 [00:00<?, ?it/s]
+linear
+  0%|          | 0/20 [00:00<?, ?it/s]
+legal
+  0%|          | 0/20 [00:00<?, ?it/s]
+even_odd_flipped
+  0%|          | 0/20 [00:00<?, ?it/s]
+mine_theirs_first_tile
+  0%|          | 0/20 [00:00<?, ?it/s]
+placed_and_flipped
+  0%|          | 0/20 [00:00<?, ?it/s]
+num_flipped
+  0%|          | 0/20 [00:00<?, ?it/s]
+black_white_first_tile
+  0%|          | 0/20 [00:00<?, ?it/s]
+placed_and_flipped_stripe
+  0%|          | 0/20 [00:00<?, ?it/s]
+placed_and_flipped
+  0%|          | 0/20 [00:00<?, ?it/s]
+placed_and_flipped_stripe
+  0%|          | 0/20 [00:00<?, ?it/s]
+accesible
+  probe_module  layer_0  layer_1  layer_2  ...  layer_4  layer_5  layer_6  layer_7
+0         post   0.9939   0.9945   0.9970  ...   0.9992   0.9932   0.9738   0.9675
+1          mid   0.9996   0.9964   0.9964  ...   0.9994   0.9994   0.9931   0.9714
+
+[2 rows x 9 columns]
+placed
+  probe_module  layer_0  layer_1  layer_2  ...  layer_4  layer_5  layer_6  layer_7
+0         post      1.0   0.9999      1.0  ...   0.9999   0.9998   0.9992   0.9978
+1          mid      1.0   1.0000      1.0  ...   1.0000   0.9998   0.9997   0.9993
+
+[2 rows x 9 columns]
+flipped
+  probe_module  layer_0  layer_1  layer_2  ...  layer_4  layer_5  layer_6  layer_7
+0         post   0.8699   0.9261   0.9565  ...   0.9819    0.985   0.9836   0.9809
+1          mid   0.8014   0.8951   0.9396  ...   0.9782    0.985   0.9855   0.9840
+
+[2 rows x 9 columns]
+linear
+  probe_module  layer_0  layer_1  layer_2  ...  layer_4  layer_5  layer_6  layer_7
+0         post   0.9084   0.9473   0.9706  ...   0.9894   0.9933   0.9941   0.9932
+1          mid   0.8883   0.9434   0.9683  ...   0.9886   0.9931   0.9951   0.9938
+
+[2 rows x 9 columns]
+legal
+  probe_module  layer_0  layer_1  layer_2  ...  layer_4  layer_5  layer_6  layer_7
+0         post   0.8658   0.8968   0.9114  ...   0.9503   0.9835   0.9846   0.9831
+1          mid   0.8535   0.8907   0.9076  ...   0.9213   0.9516   0.9838   0.9841
+
+[2 rows x 9 columns]
+even_odd_flipped
+  probe_module  layer_0  layer_1  layer_2  ...  layer_4  layer_5  layer_6  layer_7
+0         post   0.7143   0.7268   0.7423  ...   0.7517   0.7607    0.774   0.8029
+
+[1 rows x 9 columns]
+mine_theirs_first_tile
+  probe_module  layer_0  layer_1  layer_2  ...  layer_4  layer_5  layer_6  layer_7
+0         post   0.8249   0.8045   0.8167  ...   0.8014   0.7973   0.8007   0.7962
+
+[1 rows x 9 columns]
+placed_and_flipped
+  probe_module  layer_0  layer_1  layer_2  ...  layer_4  layer_5  layer_6  layer_7
+0         post   0.2132   0.1746   0.1399  ...   0.1014   0.0846   0.0807   0.0654
+1          mid   0.1368   0.1658   0.1369  ...   0.1010   0.0974   0.0808   0.0758
+
+[2 rows x 9 columns]
+num_flipped
+  probe_module  layer_0  layer_1  layer_2  ...  layer_4  layer_5  layer_6  layer_7
+0         post   0.1448   0.1508   0.1519  ...   0.1554   0.1599   0.1611     0.16
+
+[1 rows x 9 columns]
+black_white_first_tile
+  probe_module  layer_0  layer_1  layer_2  ...  layer_4  layer_5  layer_6  layer_7
+0         post   0.1448   0.1508   0.1519  ...   0.1554   0.1599   0.1611     0.16
+
+[1 rows x 9 columns]
+num_flipped_with_bias
+Empty DataFrame
+Columns: [probe_module, layer_0, layer_1, layer_2, layer_3, layer_4, layer_5, layer_6, layer_7]
+Index: []
+placed_and_flipped_stripe
+  probe_module  layer_0  layer_1  layer_2  ...  layer_4  layer_5  layer_6  layer_7
+0         post   0.2475   0.2332   0.2011  ...   0.1115   0.0677   0.0368   0.0222
+1          mid   0.1682   0.2169   0.2054  ...   0.1267   0.0924   0.0491   0.0279
+
+[2 rows x 9 columns]
+wandb: Waiting for W&B process to finish... (success).
+wandb: 🚀 View run Othello-GPT probe evaluation at: https://wandb.ai/feedback2code/Othello-GPT%20probe%20evaluation%20test/runs/sxsh0gu5
+wandb: Synced 6 W&B file(s), 12 media file(s), 14 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20240912_132939-sxsh0gu5/logs
+\label{tab:accesible}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+probe_module & layer_0 & layer_1 & layer_2 & layer_3 & layer_4 & layer_5 & layer_6 & layer_7 \\
+\midrule
+post & 0.993900 & 0.994500 & 0.997000 & 0.999100 & 0.999200 & 0.993200 & 0.973800 & 0.967500 \\
+mid & 0.999600 & 0.996400 & 0.996400 & 0.998100 & 0.999400 & 0.999400 & 0.993100 & 0.971400 \\
+\bottomrule
+\end{tabular}
+
+\label{tab:placed}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+probe_module & layer_0 & layer_1 & layer_2 & layer_3 & layer_4 & layer_5 & layer_6 & layer_7 \\
+\midrule
+post & 1.000000 & 0.999900 & 1.000000 & 0.999900 & 0.999900 & 0.999800 & 0.999200 & 0.997800 \\
+mid & 1.000000 & 1.000000 & 1.000000 & 0.999900 & 1.000000 & 0.999800 & 0.999700 & 0.999300 \\
+\bottomrule
+\end{tabular}
+
+\label{tab:flipped}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+probe_module & layer_0 & layer_1 & layer_2 & layer_3 & layer_4 & layer_5 & layer_6 & layer_7 \\
+\midrule
+post & 0.869900 & 0.926100 & 0.956500 & 0.973200 & 0.981900 & 0.985000 & 0.983600 & 0.980900 \\
+mid & 0.801400 & 0.895100 & 0.939600 & 0.964400 & 0.978200 & 0.985000 & 0.985500 & 0.984000 \\
+\bottomrule
+\end{tabular}
+
+\label{tab:linear}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+probe_module & layer_0 & layer_1 & layer_2 & layer_3 & layer_4 & layer_5 & layer_6 & layer_7 \\
+\midrule
+post & 0.908400 & 0.947300 & 0.970600 & 0.981900 & 0.989400 & 0.993300 & 0.994100 & 0.993200 \\
+mid & 0.888300 & 0.943400 & 0.968300 & 0.980400 & 0.988600 & 0.993100 & 0.995100 & 0.993800 \\
+\bottomrule
+\end{tabular}
+
+\label{tab:legal}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+probe_module & layer_0 & layer_1 & layer_2 & layer_3 & layer_4 & layer_5 & layer_6 & layer_7 \\
+\midrule
+post & 0.865800 & 0.896800 & 0.911400 & 0.919500 & 0.950300 & 0.983500 & 0.984600 & 0.983100 \\
+mid & 0.853500 & 0.890700 & 0.907600 & 0.914900 & 0.921300 & 0.951600 & 0.983800 & 0.984100 \\
+\bottomrule
+\end{tabular}
+
+\label{tab:even_odd_flipped}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+probe_module & layer_0 & layer_1 & layer_2 & layer_3 & layer_4 & layer_5 & layer_6 & layer_7 \\
+\midrule
+post & 0.714300 & 0.726800 & 0.742300 & 0.748400 & 0.751700 & 0.760700 & 0.774000 & 0.802900 \\
+\bottomrule
+\end{tabular}
+
+\label{tab:mine_theirs_first_tile}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+probe_module & layer_0 & layer_1 & layer_2 & layer_3 & layer_4 & layer_5 & layer_6 & layer_7 \\
+\midrule
+post & 0.824900 & 0.804500 & 0.816700 & 0.795200 & 0.801400 & 0.797300 & 0.800700 & 0.796200 \\
+\bottomrule
+\end{tabular}
+
+\label{tab:placed_and_flipped}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+probe_module & layer_0 & layer_1 & layer_2 & layer_3 & layer_4 & layer_5 & layer_6 & layer_7 \\
+\midrule
+post & 0.213200 & 0.174600 & 0.139900 & 0.118600 & 0.101400 & 0.084600 & 0.080700 & 0.065400 \\
+mid & 0.136800 & 0.165800 & 0.136900 & 0.112800 & 0.101000 & 0.097400 & 0.080800 & 0.075800 \\
+\bottomrule
+\end{tabular}
+
+\label{tab:num_flipped}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+probe_module & layer_0 & layer_1 & layer_2 & layer_3 & layer_4 & layer_5 & layer_6 & layer_7 \\
+\midrule
+post & 0.144800 & 0.150800 & 0.151900 & 0.153700 & 0.155400 & 0.159900 & 0.161100 & 0.160000 \\
+\bottomrule
+\end{tabular}
+
+\label{tab:black_white_first_tile}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+probe_module & layer_0 & layer_1 & layer_2 & layer_3 & layer_4 & layer_5 & layer_6 & layer_7 \\
+\midrule
+post & 0.144800 & 0.150800 & 0.151900 & 0.153700 & 0.155400 & 0.159900 & 0.161100 & 0.160000 \\
+\bottomrule
+\end{tabular}
+
+\label{tab:num_flipped_with_bias}
+\begin{tabular}{rrrrrrrrr}
+\toprule
+probe_module & layer_0 & layer_1 & layer_2 & layer_3 & layer_4 & layer_5 & layer_6 & layer_7 \\
+\midrule
+\bottomrule
+\end{tabular}
+
+\label{tab:placed_and_flipped_stripe}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+probe_module & layer_0 & layer_1 & layer_2 & layer_3 & layer_4 & layer_5 & layer_6 & layer_7 \\
+\midrule
+post & 0.247500 & 0.233200 & 0.201100 & 0.153000 & 0.111500 & 0.067700 & 0.036800 & 0.022200 \\
+mid & 0.168200 & 0.216900 & 0.205400 & 0.164800 & 0.126700 & 0.092400 & 0.049100 & 0.027900 \\
+\bottomrule
+\end{tabular}
+

@@ -72,6 +72,8 @@ rows = 8
 cols = 8
 options = 3
 
+from utils import *
+
 BLANK = 0
 FILLED_UNAFFECTED = 1
 FLIPPED = 2
@@ -93,8 +95,6 @@ FLIPPED_BOTTOM = 4
 FLIPPED_BOTTOM_LEFT = 5
 FLIPPED_LEFT = 6
 FLIPPED_TOP_LEFT = 7'''
-
-from utils import *
 
 from typing import List, Tuple
 
@@ -457,7 +457,7 @@ def get_state_stack_one_hot_placed_and_flipped_stripe(games_str : Int[Tensor, "n
 
 # Create all the get_state_stack_one_hot_... functions below using teh get_state_stack_one_hot_general function
 # get_state_stack_one_hot = get_state_stack_one_hot_general(get_state_stack_empty_yours_mine, state_stack_to_one_hot)
-get_state_stack_one_hot_flipped = get_state_stack_one_hot_general(build_state_stack_flipped, state_stack_to_one_hot_flipped)
+get_state_stack_one_hot_flipped = get_state_stack_one_hot_general(seq_to_state_stack_flipped, state_stack_to_one_hot_flipped)
 get_state_stack_one_hot_placed = get_state_stack_one_hot_general(seq_to_state_stack_flipped, state_stack_to_one_hot_placed)
 # get_state_stack_one_hot_placed_and_flipped = get_state_stack_one_hot_general(seq_to_state_stack_placed_and_flipped, state_stack_to_one_hot_placed_and_flipped)
 # get_state_stack_one_hot_num_flipped = get_state_stack_one_hot_general(get_state_stack_num_flipped, state_stack_to_one_hot_flipped)
