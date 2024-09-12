@@ -9,7 +9,11 @@ import numpy as np
 from utils import probe_directions_list, tuple_to_label
 import os
 
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
+
+from create_dataset import get_filtered_dataset
+
+import pandas as pd
 
 import joblib
 
@@ -24,7 +28,10 @@ def get_variable_names():
     return variable_names
 
 def tree_to_cnf(tree, feature_names=None):
+    recurse_count = 0
     def recurse(node, path):
+        nonlocal recurse_count
+        recurse_count += 1
         if tree.feature[node] != -2:  # not a leaf
             feature = feature_names[tree.feature[node]] if feature_names is not None else f"feature_{tree.feature[node]}"
 
@@ -44,7 +51,7 @@ def tree_to_cnf(tree, feature_names=None):
             predicted_value = tree.value[node][0, 0]
             yield f"({' AND '.join(path)} => {predicted_value:.4f})"
 
-    return list(recurse(0, []))
+    return list(recurse(0, [])), recurse_count
 
 def get_accuracy(y_pred, y_test):
     correct = 0
@@ -86,12 +93,16 @@ class DecisionTree(NeuronPredictor):
     def predict(self, X):
         return self.regressor.predict(X)
 
-    def fit(self, X, y):
+    def fit(self, X, y, **kwargs):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         top_score = -math.inf
-        self.regressor = DecisionTreeRegressor(random_state = 0, max_depth=3)  
-        self.regressor.fit(X_train, y_train)
+        # if max_depth is not None:
+        #    self.max_depth = max_depth
+        # else:
+        #     self.max_depth = 3
         self.max_depth = 3
+        self.regressor = DecisionTreeRegressor(random_state = 0, **kwargs)  
+        self.regressor.fit(X_train, y_train)
         # I think high max_depth will be the main limmiting time factor
         """for max_depth in range(1, 7):
             regressor = DecisionTreeRegressor(random_state = 0, max_depth=max_depth)  
@@ -108,8 +119,10 @@ class DecisionTree(NeuronPredictor):
                 if f1 >= 0.95:
                     break"""
 
-    def get_clean_format(self):
-        cnf_rules = tree_to_cnf(self.regressor.tree_, feature_names=self.column_names_input)
+    def get_clean_format(self, column_names):
+        if column_names is None:
+            column_names = self.column_names_input
+        cnf_rules = tree_to_cnf(self.regressor.tree_, feature_names=column_names)
         return cnf_rules
 
     def get_sparcity(self):
@@ -130,3 +143,70 @@ class DecisionTree(NeuronPredictor):
         file_path = f"neuron_predictors/decision_trees/decision_tree_L{self.layer}_N{self.neuron}.joblib"#
         # Save the decision tree to a file
         joblib.dump(self.regressor, file_path)
+
+
+def new_weighted_f1_score(y, y_pred):
+    tp = 0
+    tn = 0
+    fp = 0
+    fn = 0
+    for i in range(len(y)):
+        score = max(y[i], y_pred[i])
+        if y_pred[i] > 0 and y[i] > 0:
+            tp += score
+        elif y_pred[i] <= 0 and y[i] <= 0:
+            tn += 1
+        elif y_pred[i] > 0 and y[i] <= 0:
+            fp += score
+        elif y_pred[i] <= 0 and y[i] > 0:
+            fn += score
+    precision = tp / (tp + fp + EPSILON)
+    recall = tp / (tp + fn + EPSILON)
+    f1 = 2 * (precision * recall) / (precision + recall + EPSILON)
+    return f1.item()
+
+def get_data(layer, neuron, dataset : pd.DataFrame | str = None, **kwargs):
+    if type(dataset) == str:
+        small_dataset_softmax = pd.read_csv(dataset)
+    elif type(dataset) == pd.DataFrame:
+        small_dataset_softmax = dataset
+    else:
+        small_dataset_softmax = pd.read_csv(f"data/neuron_datasets/logic_small_L{layer}.csv")
+    dataset = get_filtered_dataset(small_dataset_softmax, layer, neuron, overfitting_strength=None, **kwargs)
+    dataset_columns_new = dataset.columns.tolist()
+
+    dataset_columns_new = [col_name for col_name in dataset_columns_new if col_name[3:6] != "not"]
+    dataset = dataset[dataset_columns_new]
+
+    column_names = dataset.columns
+    column_names_input = column_names[:-1]
+    column_names_output = [column_names[-1]]
+
+    X = dataset[column_names_input].astype(float)
+    y = dataset[column_names_output].astype(float)
+    # turn into numpy arrays
+    X = X.to_numpy()
+    y = y.to_numpy()
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    return X_train, X_test, y_train, y_test, column_names_input
+
+def train_decision_tree(X_train, y_train, layer, neuron, **kwargs) -> DecisionTree:
+    descision_tree = DecisionTree(layer, neuron)
+    descision_tree.fit(X_train, y_train, **kwargs)
+    return descision_tree
+
+def evaluate_decision_tree(descision_tree : DecisionTree, X_test, y_test):
+    column_names_input = descision_tree.column_names_input
+    y_pred_test = descision_tree.predict(X_test)
+    weighted_f1 = new_weighted_f1_score(y_test, y_pred_test)
+    f1 = f1_score(y_test > 0, y_pred_test > 0)
+    rules, variable_count = descision_tree.get_clean_format(column_names_input)
+    return weighted_f1, f1, variable_count, rules, y_pred_test
+
+def train_and_evaluate_decision_tree(layer : int, neuron : int, dataset : pd.DataFrame | str = None, **kwargs):
+    X_train, X_test, y_train, y_test, column_names_input = get_data(layer, neuron, dataset)
+    descision_tree = train_decision_tree(X_train, y_train, layer, neuron, **kwargs)
+    descision_tree.column_names_input = column_names_input
+    weighted_f1, f1, variable_count, rules, _ = evaluate_decision_tree(descision_tree, X_test, y_test)
+    return descision_tree, weighted_f1, f1, variable_count, rules

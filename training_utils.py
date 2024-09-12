@@ -78,6 +78,8 @@ FLIPPED = 2
 PLAYED_BLACK = 3
 PLAYED_WHITE = 4
 UNAFFECTED = 5
+ACCESIBLE = 1
+LEGAL = 2
 
 '''EMPTY = 0
 YOURS = 2
@@ -175,6 +177,51 @@ def seq_to_state_stack_flipped(str_moves):
         states.append(_state)
     states = np.stack(states, axis=0)
     return states
+
+
+def seq_to_state_stack_legal(str_moves):
+    """
+    0: blank
+    1: unaffected
+    2: accesible
+    3: legal
+    """
+    if isinstance(str_moves, t.Tensor):
+        str_moves = str_moves.tolist()
+    board = OthelloBoardState()
+    states = []
+    for move_idx, move in enumerate(str_moves):
+        player = "black" if move_idx % 2 == 0 else "white"
+        try:
+            board.umpire(move)
+        except RuntimeError:
+            breakpoint()
+    _state = np.copy(board.state)
+    print(_state)
+        
+"""board_seqs_string = t.load(
+    os.path.join(
+        section_dir,
+        "data/board_seqs_string_train.pth",
+    )
+)
+games_str = board_seqs_string[:10]
+assert games_str.shape == (10, 60)
+
+state_stack_legal = seq_to_state_stack_legal(games_str)"""
+
+
+'''state_one_hot = get_state_stack_one_hot_first_tile_places_black_white(games_str)
+assert state_one_hot.shape == (10, 60, 8, 8, 3)
+# print(state_one_hot[0, 15])
+
+state_one_hot = get_state_stack_one_hot_first_tile_places_mine_theirs(games_str)
+assert state_one_hot.shape == (10, 60, 8, 8, 3)
+# print(state_one_hot[0, 15])
+
+from utils import plot_game
+plot_game(games_str, 0)'''
+
 
 def seq_to_state_stack_placed_and_flipped(str_moves):
     """
@@ -517,7 +564,6 @@ def get_state_stack_one_hot_first_tile_places_mine_theirs(games_str : Int[Tensor
     ).to(device)
     return state_stack_one_hot_first_tile_places_mine_theirs
 
-
 '''board_seqs_string = t.load(
     os.path.join(
         section_dir,
@@ -538,3 +584,113 @@ assert state_one_hot.shape == (10, 60, 8, 8, 3)
 from utils import plot_game
 plot_game(games_str, 0)'''
 
+
+
+WHITE = -1
+BLACK = 1
+BLANK = 0
+ACCESIBLE = 2
+LEGAL = 3
+
+def is_legal_or_accesible(_state, row, col, player):
+    is_accesible = False
+    for dr in [-1, 0, 1]:
+        for dc in [-1, 0, 1]:
+            if dr == 0 and dc == 0:
+                continue
+            r, c = row + dr, col + dc
+            if r < 0 or r >= 8 or c < 0 or c >= 8:
+                continue
+            if _state[r, c] == -player or _state[r, c] == player:
+                is_accesible = True
+            if _state[r, c] == player:
+                while True:
+                    r += dr
+                    c += dc
+                    if r < 0 or r >= 8 or c < 0 or c >= 8:
+                        break
+                    if _state[r, c] == BLANK:
+                        break
+                    if _state[r, c] == -player:
+                        return LEGAL
+    if is_accesible:
+        return ACCESIBLE
+    return BLANK
+                    
+
+def seq_to_state_stack_legal(str_moves):
+    """
+    0: blank
+    1: unaffected
+    2: accesible
+    3: legal
+    """
+    if isinstance(str_moves, t.Tensor):
+        str_moves = str_moves.tolist()
+    board = OthelloBoardState()
+    states = []
+    for move_idx, move in enumerate(str_moves):
+        # The Player who just played
+        player = BLACK if move_idx % 2 == 0 else WHITE
+        try:
+            board.umpire(move)
+        except RuntimeError:
+            breakpoint()
+        _state = np.copy(board.state)
+        # Do Accessible
+        for row in range(8):
+            for col in range(8):
+                if _state[row, col] != BLANK:
+                    continue
+                _state[row, col] = is_legal_or_accesible(_state, row, col, player)
+        # _state = np.abs(_state)
+        states.append(_state)
+    states = np.stack(states, axis=0)
+    return t.tensor(states)
+
+def build_state_stack_legal(board_seqs_string):
+    """
+    Construct stack of board-states.
+    This function will also filter out corrputed game-sequences.
+    """
+    state_stack = []
+    for idx, seq in enumerate(board_seqs_string):
+        _stack = seq_to_state_stack_legal(seq)
+        state_stack.append(_stack)
+    return t.tensor(np.stack(state_stack))
+
+def state_stack_to_one_hot_accesible(state_stack):
+    one_hot = t.zeros(
+        state_stack.shape[0],
+        state_stack.shape[1],
+        8,  # rows
+        8,  # cols
+        2,  # options
+        device=state_stack.device,
+        dtype=t.int,
+    )  # [batch_size, 59, 8, 8, 4]
+
+    # Accesible
+    one_hot[..., 0] = state_stack >= ACCESIBLE
+    one_hot[..., 1] = 1 - one_hot[..., 0]
+    return one_hot
+
+def state_stack_to_one_hot_legal(state_stack):
+    one_hot = t.zeros(
+        state_stack.shape[0],
+        state_stack.shape[1],
+        8,  # rows
+        8,  # cols
+        2,  # options
+        device=state_stack.device,
+        dtype=t.int,
+    )  # [batch_size, 59, 8, 8, 4]
+
+    # Accesible
+    one_hot[..., 0] = state_stack == LEGAL
+    one_hot[..., 1] = 1 - one_hot[..., 0]
+    return one_hot
+
+
+get_state_stack_one_hot_accesible = get_state_stack_one_hot_general(seq_to_state_stack_legal, state_stack_to_one_hot_accesible)
+get_state_stack_one_hot_legal = get_state_stack_one_hot_general(seq_to_state_stack_legal, state_stack_to_one_hot_legal)

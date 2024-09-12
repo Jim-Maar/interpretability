@@ -162,10 +162,13 @@ for probe_module in probe_modules:
     probe_types = os.listdir(f"probes/{probe_module}")
     for probe_type in probe_types:
         for layer in range(8):
+            path = f"probes/{probe_module}/{probe_type}/resid_{layer}_{probe_type}.pth"
+            if not os.path.exists(path):
+                continue
             if device.type == "cpu":
-                probe = t.load(f"probes/{probe_module}/{probe_type}/resid_{layer}_{probe_type}.pth", map_location=device).detach()
+                probe = t.load(path, map_location=device).detach()
             else:
-                probe = t.load(f"probes/{probe_module}/{probe_type}/resid_{layer}_{probe_type}.pth").to(device).detach()
+                probe = t.load(path).to(device).detach()
             probes[(probe_module, probe_type, layer)] = probe
 
 def get_probe(layer : Int = 5, probe_type : str = "linear", probe_module : str = "post"):

@@ -51,7 +51,9 @@ from training_utils import (
     get_state_stack_one_hot_empty_yours_mine,
     get_state_stack_one_hot_placed_and_flipped,
     get_state_stack_one_hot_placed_and_flipped_stripe,
-    get_state_stack_one_hot_placed)
+    get_state_stack_one_hot_placed,
+    get_state_stack_one_hot_accesible,
+    get_state_stack_one_hot_legal,)
 
 device = t.device("cuda" if t.cuda.is_available() else "cpu")
 print(f"device: {device}")
@@ -132,7 +134,7 @@ class ProbeTrainingArgs():
         num_games_val: int = 0
         num_games_test: int = 0
     else:
-        num_games_train: int = 1000000
+        num_games_train: int = 300000
         num_games_val: int = 0
         num_games_test: int = 0
 
@@ -368,7 +370,7 @@ if __name__ == "__main__":
                 args.relevant_mode = 0
             trainer = LinearProbeTrainer(model, args)
             trainer.train()'''
-    args = ProbeTrainingArgs()
+    '''args = ProbeTrainingArgs()
     for probe in ["placed_and_flipped"]:
         for cache_position in ["resid_post", "resid_mid"]:
             for layer in [0, 1, 2, 3, 4, 5, 6, 7]:
@@ -393,5 +395,28 @@ if __name__ == "__main__":
                 elif probe == "linear":
                     args.get_state_stack_one_hot = get_state_stack_one_hot_empty_yours_mine
                     args.options = 3
+                trainer = LinearProbeTrainer(model, args)
+                trainer.train()'''
+    args = ProbeTrainingArgs()
+    for probe in ["accesible", "legal"]:
+        for cache_position in ["resid_post", "resid_mid"]:
+            for layer in [0, 1, 2, 3, 4, 5, 6, 7]:
+                args = ProbeTrainingArgs()
+                args.layer = layer
+                args.wandb_project = "Othello-GPT-Accesible-and-Legal-Probes"
+                args.cache_position = cache_position
+                args.probe_name = probe
+                args.full_probe_name = f"resid_{layer}_{probe}"
+                args.modes = 1
+                if probe == "accesible":
+                    args.multi_label = False
+                    args.get_state_stack_one_hot = get_state_stack_one_hot_accesible
+                    args.options = 2
+                elif probe == "legal":
+                    args.multi_label = False
+                    args.get_state_stack_one_hot = get_state_stack_one_hot_legal
+                    args.options = 2
+                else:
+                    raise ValueError("Invalid Probe")
                 trainer = LinearProbeTrainer(model, args)
                 trainer.train()

@@ -157,7 +157,7 @@ def get_neuron_names(layer, neurons = list(range(2048))):
     return [f"L{layer}_N{i}" for i in neurons]
 
 
-def create_big_dataset(layer, num_samples, dataset_name, start=0, use_softmax=True, overfitting_strength=1, inference_size=1000, pos_start=0, pos_end=60):
+def get_big_dataset(layer, num_samples, start=0, use_softmax=True, overfitting_strength=None, inference_size=1000, pos_start=0, pos_end=60):
     """
     Creates a pandas DataFrame with the input variables and the neuron activations for a given layer and neuron.
     It has one column for each input variable and one column for the neuron activations.
@@ -197,9 +197,23 @@ def create_big_dataset(layer, num_samples, dataset_name, start=0, use_softmax=Tr
     
     # Shuffle the rows of the dataframe
     df = df.sample(frac=1).reset_index(drop=True)
-    
+    return df
+
+
+def create_big_dataset(layer, num_samples, dataset_name, start=0, use_softmax=True, overfitting_strength=None, inference_size=1000, pos_start=0, pos_end=60):
+    """
+    Creates a pandas DataFrame with the input variables and the neuron activations for a given layer and neuron.
+    It has one column for each input variable and one column for the neuron activations.
+    """
+    # Get the big dataset
+    df = get_big_dataset(layer, num_samples, start, use_softmax, overfitting_strength, inference_size, pos_start, pos_end)
     # Save the dataframe to a CSV file
     df.to_csv(f"data/neuron_datasets/{dataset_name}_L{layer}.csv", index=False)
+
+
+'''def create_big_dataset_from_cache(layer, num_samples, start = 0, use_softmax=True, pos_start=0, pos_end=60):
+    df = get_big_dataset(layer, num_samples, start=start, use_softmax=use_softmax, inference_size=num_samples, pos_start=pos_start, pos_end=pos_end)
+    return df'''
 
 
 def get_filtered_dataset(big_dataset : pd.DataFrame, layer, neuron : int, size = 5000, overfitting_strength : int = 1) -> pd.DataFrame:
