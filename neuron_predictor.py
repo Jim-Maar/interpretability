@@ -14,7 +14,7 @@ class NeuronPredictor(ABC):
         pass
 
     @abstractmethod
-    def get_sparcity(self):
+    def get_variable_count(self):
         pass
 
     @abstractmethod
