@@ -60,25 +60,6 @@ def get_accuracy(y_pred, y_test):
             correct += 1
     return correct / len(y_test)
 
-def get_f1(y_pred, y_test):
-    tp = 0
-    tn = 0
-    fp = 0
-    fn = 0
-    for i in range(len(y_test)):
-        if y_pred[i] > 0 and y_test[i] > 0:
-            tp += 1
-        elif y_pred[i] <= 0 and y_test[i] <= 0:
-            tn += 1
-        elif y_pred[i] > 0 and y_test[i] <= 0:
-            fp += 1
-        elif y_pred[i] <= 0 and y_test[i] > 0:
-            fn += 1
-    precision = tp / (tp + fp)
-    recall = tp / (tp + fn)
-    f1 = 2 * (precision * recall) / (precision + recall)
-    return f1
-
 EPSILON = 0.000001
 
 def scorefunction(depth, accuracy):
@@ -86,6 +67,7 @@ def scorefunction(depth, accuracy):
 
 class DecisionTree(NeuronPredictor):
     def __init__(self, layer, neuron):
+        #TODO: This is a bad coupling
         self.column_names_input = get_variable_names()
         self.neuron = neuron
         self.layer = layer
@@ -95,29 +77,8 @@ class DecisionTree(NeuronPredictor):
 
     def fit(self, X, y, **kwargs):
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        top_score = -math.inf
-        # if max_depth is not None:
-        #    self.max_depth = max_depth
-        # else:
-        #     self.max_depth = 3
-        self.max_depth = 3
         self.regressor = DecisionTreeRegressor(random_state = 0, **kwargs)  
         self.regressor.fit(X_train, y_train)
-        # I think high max_depth will be the main limmiting time factor
-        """for max_depth in range(1, 7):
-            regressor = DecisionTreeRegressor(random_state = 0, max_depth=max_depth)  
-            regressor.fit(X_train, y_train)
-            y_pred = regressor.predict(X_test)
-            # Get the f1 score using a library function
-            f1 = f1_score(y_test > 0, y_pred > 0)
-            # f1 = get_f1(y_pred, y_test)
-            score = scorefunction(max_depth, f1)
-            if score > top_score:
-                top_score = score
-                self.regressor = regressor
-                self.max_depth = max_depth
-                if f1 >= 0.95:
-                    break"""
 
     def get_clean_format(self, column_names):
         if column_names is None:
