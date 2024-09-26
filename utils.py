@@ -391,6 +391,8 @@ def plot_boards_general(x_labels : List[str],
                         size_of_board : Int = 200,
                         margin_t : Int = 100,
                         title_text : str = "",
+                        color_scale : str = "RdBu",
+                        color_range  : str = "symmetric",
                         static_image : bool = False,
                         save : bool = False):
     # TODO: add attn/mlp only
@@ -404,8 +406,14 @@ def plot_boards_general(x_labels : List[str],
     vertical_spacing = 70 / height
     fig = make_subplots(rows=y_len, cols=x_len, subplot_titles=subplot_titles, vertical_spacing=vertical_spacing)
     boards_min = boards.min().item()
-    boards_max = boards.max().item()
+    boards_max = boards.max().item()        
     abs_max = max(abs(boards_min), abs(boards_max))
+    if color_range == "symmetric":
+        begin = -abs_max
+        end = abs_max
+    else:
+        begin = boards_min
+        end = boards_max
     for x in range(x_len):
         for y in range(y_len):
             heatmap = go.Heatmap(
@@ -413,9 +421,9 @@ def plot_boards_general(x_labels : List[str],
                 x=list(range(0, rows)),
                 y=reverse_alpha,
                 hoverongaps = False,
-                zmin=-abs_max,
-                zmax=abs_max,
-                colorscale="RdBu",
+                zmin=begin,
+                zmax=end,
+                colorscale=color_scale,
             )
             fig.add_trace(
                 heatmap,
