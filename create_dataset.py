@@ -54,7 +54,7 @@ def run_inference(games_int : Int[Tensor, "batch pos"], modules : list[str]) -> 
 def get_variables(resid_mid : Float[Tensor, "batch d_model"], layer, use_softmax = True, use_argmax=False, module:str="mid") -> Float[Tensor, "batch variables"]:
     probe_results_all = []
     # TODO: Add Accesible and Legal
-    for probe_name in ["linear", "flipped", "placed"]:
+    for probe_name in ["linear", "flipped", "placed", "accesible", "legal"]:
         probe = get_probe(layer, probe_name, module)[0]
         probe_result = einops.einsum(resid_mid, probe, "batch d_model, d_model rows cols options -> batch rows cols options")
         options = probe_result.shape[-1]
@@ -73,7 +73,7 @@ def get_variables(resid_mid : Float[Tensor, "batch d_model"], layer, use_softmax
 def get_variable_names(remove_negative_features : bool = False) -> List[str]:
     variable_names = []
     # TODO: Add Accesible and Legal
-    for probe_name in ["linear", "flipped", "placed"]:
+    for probe_name in ["linear", "flipped", "placed", "accesible", "legal"]:
         for row in range(8):
             for col in range(8):
                 for feature_name in probe_directions_list[probe_name]:
@@ -236,10 +236,13 @@ class variableExtractor(ABC):
         pass
 
 class featureExtractor(variableExtractor):
-    def __init__(self, module : str, layer : int, use_softmax : bool = True, use_argmax : bool = True, in_or_out : str = "in"):
+    def __init__(self, module : str, layer : int, use_softmax : bool = True, use_argmax : bool = True, in_or_out : str = None):
         self.use_softmax = use_softmax
         self.use_argmax = use_argmax
-        self.input_names = [name + " " + in_or_out for name in get_variable_names(False)]
+        if in_or_out is None:
+            self.input_names = get_variable_names(False)
+        else:
+            self.input_names = [name + " " + in_or_out for name in get_variable_names(False)]
         self.module = module
         self.layer = layer
         if self.module == "ln1":
@@ -248,6 +251,8 @@ class featureExtractor(variableExtractor):
             self.full_module_name = f"blocks.{self.layer}.ln2.hook_normalized"
         elif self.module == "mid":
             self.full_module_name = f"blocks.{self.layer}.hook_resid_mid"
+        elif self.module == "post":
+            self.full_module_name = f"blocks.{self.layer}.mlp.hook_post"
 
     def get_module_names(self) -> List[str]:
         return [self.full_module_name]
@@ -286,10 +291,11 @@ def create_big_dataset_2(layer, num_samples, dataset_name, variable_extractor_in
     dataframes = []
 
     while len(dataframes) == 0 or sum(len(df) for df in dataframes) < num_samples:
+        real_inference_size = min(inference_size, num_samples)
         indices = t.arange(batch, min(batch + inference_size, start + num_samples))
         games_int = board_seqs_int[indices.cpu()]
 
-        assert isinstance(games_int, Int[Tensor, f"batch={inference_size} full_game_len=60"])
+        assert isinstance(games_int, Int[Tensor, f"batch={real_inference_size} full_game_len=60"])
 
         modules = variable_extractor_in.get_module_names() + variable_extractor_out.get_module_names()
         cache = run_inference(games_int, modules)
@@ -304,6 +310,7 @@ def create_big_dataset_2(layer, num_samples, dataset_name, variable_extractor_in
     df = pd.concat(dataframes, ignore_index=True).iloc[:num_samples]
     df = df.sample(frac=1).reset_index(drop=True)
     df.to_csv(f"data/neuron_datasets/{dataset_name}_L{layer}.csv", index=False)
+    return df
     
 
 '''def create_big_dataset_from_cache(layer, num_samples, start = 0, use_softmax=True, pos_start=0, pos_end=60):
@@ -389,9 +396,37 @@ if __name__ == "__main__":
     # create_big_dataset(layer, 10000, "logic_testing_no_softmax", use_softmax=False)
     # create_big_dataset(layer, 100000, "big_argmax_train", use_argmax=True)
     # create_big_dataset(layer, 50000, "big_argmax_eval", start=100000, use_argmax=True)
-    feature_extractor_in = featureExtractor(module = "ln1", layer = layer, use_softmax=False, use_argmax=False, in_or_out="in")
-    feature_extractor_out = featureExtractor(module = "mid", layer=layer, use_softmax=False, use_argmax=False, in_or_out="out")
     # feature_extractor = featureExtractor()
     # neuron_extractor = neuronActivationExtractor(layer, [0, 1, 2])
     # create_big_dataset_2(layer, 2000, "new_dataset_argmax_test", feature_extractor, neuron_extractor, start=0)
-    create_big_dataset_2(layer, 2000, "attn_dataset_logits_eval", feature_extractor_in, feature_extractor_out, start=1000)
+    # create_big_dataset_2(layer, 1000000, "dataset_test_test_big", feature_extractor_in, feature_extractor_out, start=0)
+    # create_big_dataset_2(layer, 1000000, "dataset_test_test_big", feature_extractor_in, feature_extractor_out, start=0)
+    train_size = 100000
+    test_size = 50000
+    for layer in range(8):
+        print(f"Layer {layer}")
+        feature_extractor_in = featureExtractor(module = "ln2", layer = layer, use_softmax=False, use_argmax=True, in_or_out=None)
+        feature_extractor_out = neuronActivationExtractor(layer = layer)
+        for train_or_test in ["train", "test"]:
+            if layer <= 1 and train_or_test == "train":
+                continue
+            print(f"Train or Test: {train_or_test}")
+            print(f"Dataset Size: big")
+            if train_or_test == "train":
+                start = 0
+            else:
+                start = train_size
+            if train_or_test == "train":
+                size = train_size
+            else:
+                size = test_size
+            big_dataset = create_big_dataset_2(layer, size, f"big_argmax_{train_or_test}", feature_extractor_in, feature_extractor_out, start=start)
+            # Now convert the big dataset to a filtered dataset for a small and medium set of neurons
+            for dataset_size in ["small", "medium"]:
+                print(f"Dataset Size: {dataset_size}")
+                if dataset_size == "small":
+                    neurons = list(range(10))
+                elif dataset_size == "medium":
+                    neurons = list(range(100))
+                save_filtered_dataset_for_neurons(big_dataset, f"{dataset_size}_argmax_{train_or_test}", layer, neurons, num_samples=size)
+
