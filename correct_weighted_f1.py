@@ -17,8 +17,9 @@ import os
 import sys
 
 if __name__ == "__main__":
-    script_name = sys.argv[0]
-    layer = int(sys.argv[1])
+    # script_name = sys.argv[0]
+    # layer = int(sys.argv[1])
+    layer = 2
     bis_dataset_train = pd.read_csv(f"data/neuron_datasets/big_argmax_train_L{layer}.csv")
     big_dataset_test = pd.read_csv(f"data/neuron_datasets/big_argmax_test_L{layer}.csv")
     df = pd.read_csv(f"results_decision_tree_classifier_L{layer}.csv")
@@ -47,7 +48,7 @@ if __name__ == "__main__":
             evaluator_round.neuron_predictor = dt
             weighted_f1, weighted_f1_train, f1, f1_train, variable_count, rules = evaluator_round.evaluate()
             correct_row = (df["neuron"] == neuron) & (df["min_impurity_decrease"] == min_impurity_decrease)
-            df.loc[correct_row, "f1_train"] = f1_train
+            df.loc[correct_row, "weighted_f1"] = weighted_f1
             df.loc[correct_row, "weighted_f1_train"] = weighted_f1_train
             # df.loc[correct_row, "rules"] = rules
     # save df with new path
