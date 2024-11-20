@@ -30,6 +30,8 @@ from dataclasses import dataclass
 from rich import print as rprint
 import pandas as pd
 
+from tqdm import tqdm
+
 from plotly_utils import imshow
 from pathlib import Path
 from typing import List, Union, Optional, Tuple, Callable, Dict
@@ -452,13 +454,17 @@ class VisualzeBoardArguments:
     include_mlp_only = False
     include_pre_resid = False
     include_layer_norm = False
+    include_resid_post = True
     start_pos=0
     end_pos=59
+    layer_start=0
     layers=8
     static_image=False#
     size_of_board = 225
     margin_t = 100
     mode = "linear"
+    horizontal_spacing = 20
+    margin_l = 100
 
 def get_score_from_resid(resid, layer):
     # assert probe_name in ["linear", "flipped"]
@@ -482,17 +488,17 @@ def get_score_from_resid(resid, layer):
     # flip_score = flipped_probs[:, :, :, [0]].squeeze(dim=-1)
     return color_score, flip_score
 
-def get_boards(input_int : Float[Tensor, "pos"], vis_args : VisualzeBoardArguments, model: HookedTransformer):
-    _, cache = model.run_with_cache(input_int)
+def get_boards(cache, vis_args : VisualzeBoardArguments):
     boards = []
     flip_boards = []
     for layer in range(vis_args.layers):
         color_scores = []
         flip_scores = []
-        resid = cache["resid_post", layer][0].detach()
-        color_score, flip_score = get_score_from_resid(resid, layer)
-        color_scores += [color_score]
-        flip_scores += [flip_score]
+        if vis_args.include_resid_post:
+            resid = cache["resid_post", layer][0].detach()
+            color_score, flip_score = get_score_from_resid(resid, layer)
+            color_scores += [color_score]
+            flip_scores += [flip_score]
         if vis_args.include_pre_resid:
             resid = cache["resid_pre", layer][0].detach()
             color_score, flip_score = get_score_from_resid(resid, layer)
@@ -509,12 +515,12 @@ def get_boards(input_int : Float[Tensor, "pos"], vis_args : VisualzeBoardArgumen
             color_scores += [color_score]
             flip_scores += [flip_score]
         if vis_args.include_layer_norm:
-            resid = cache[f"blocks.{layer+1}.ln1.hook_normalized"][0].detach()
+            resid = cache[f"blocks.{layer}.ln1.hook_normalized"][0].detach()
             color_score, flip_score = get_score_from_resid(resid, layer)
             color_scores += [color_score]
             flip_scores += [flip_score]
         if vis_args.include_layer_norm:
-            resid = cache[f"blocks.{layer+1}.ln2.hook_normalized"][0].detach()
+            resid = cache[f"blocks.{layer}.ln2.hook_normalized"][0].detach()
             color_score, flip_score = get_score_from_resid(resid, layer)
             color_scores += [color_score]
             flip_scores += [flip_score]
@@ -537,7 +543,9 @@ def plot_boards(label_list: List[str], boards : Float[Tensor, "layers mode pos r
     _, _, _, rows, cols = boards.shape
     print(boards.shape)
     seq_len = vis_args.end_pos - vis_args.start_pos
-    modes = ["N"]
+    modes = []
+    if vis_args.include_resid_post:
+        modes += ["N"]
     if vis_args.include_pre_resid:
         modes += ["P"]
     if vis_args.include_attn_only:
@@ -545,16 +553,17 @@ def plot_boards(label_list: List[str], boards : Float[Tensor, "layers mode pos r
     if vis_args.include_mlp_only:
         modes += ["M"]
     if vis_args.include_layer_norm:
-        modes += ["L1"]
-        modes += ["L2"]
-    subplot_titles = [f"P: {i}, T: {label_list[i]}, L: {j}, M: {mode}" for i in range(vis_args.start_pos, vis_args.end_pos) for mode in modes for j in range(vis_args.layers)]
+        modes += ["Attn"]
+        modes += ["MLP"]
+    subplot_titles = [f"P: {i}, T: {label_list[i]}, L: {j}, {mode}" for i in range(vis_args.start_pos, vis_args.end_pos) for j in range(vis_args.layer_start, vis_args.layers) for mode in modes]
     # subplot_titles = [f"P: {i}, T: {label_list[i]}, L: {j}" for i in range(vis_args.start_pos, vis_args.end_pos) for j in range(vis_args.layers)]
-    width = vis_args.layers * vis_args.size_of_board
-    height = vis_args.margin_t + seq_len * len(modes) * vis_args.size_of_board
+    width = ((vis_args.layers - vis_args.layer_start) * len(modes) * vis_args.size_of_board) * (1 + 2 * vis_args.horizontal_spacing)
+    height = vis_args.margin_t + seq_len * vis_args.size_of_board
     vertical_spacing = 70 / height
-    fig = make_subplots(rows=seq_len * len(modes), cols=vis_args.layers, subplot_titles=subplot_titles, vertical_spacing=vertical_spacing)
+    horizontal_spacing = vis_args.horizontal_spacing
+    fig = make_subplots(rows=seq_len, cols=(vis_args.layers - vis_args.layer_start) * len(modes), subplot_titles=subplot_titles, vertical_spacing=vertical_spacing, horizontal_spacing = horizontal_spacing)
     for pos_idx, pos in enumerate(range(vis_args.start_pos, vis_args.end_pos)):
-        for layer in range(vis_args.layers):
+        for layer_idx, layer in enumerate(range(vis_args.layer_start, vis_args.layers)):
             for mode_idx, mode in enumerate(modes):
                 text_data = [[get_color(flip_boards[layer, mode_idx, pos, i, j]) for j in range(cols)] for i in range(rows)]
                 if vis_args.mode == "linear":
@@ -568,6 +577,7 @@ def plot_boards(label_list: List[str], boards : Float[Tensor, "layers mode pos r
                         zmax=1.0,
                         colorscale="RdBu",
                         texttemplate="%{text}",
+                        showscale=False,
                         # textfont_color="green",
                     )
                 elif vis_args.mode == "flipped":
@@ -584,10 +594,10 @@ def plot_boards(label_list: List[str], boards : Float[Tensor, "layers mode pos r
                     raise ValueError("Invalid Mode")
                 fig.add_trace(
                     heatmap,
-                    row=pos_idx * len(modes) + mode_idx + 1,
-                    col=layer + 1
+                    row=pos_idx + 1,
+                    col=layer_idx * len(modes) + mode_idx + 1
                 )
-    fig.layout.update(width=width, height=height, margin_t=vis_args.margin_t, title_text=f"Probe Results per Position per Layer, Mode: {modes[0]}") 
+    fig.layout.update(width=width, height=height, margin_t=vis_args.margin_t, margin_l=vis_args.margin_l, title_text=f"Probe Results per Position per Layer") 
     if vis_args.static_image:
         # count the number of images in the last_plot directory
         num_images = len(list(Path("last_plot").glob("*.png")))
@@ -596,15 +606,17 @@ def plot_boards(label_list: List[str], boards : Float[Tensor, "layers mode pos r
         fig.show()
 
 
-def visualize_game(input_str, vis_args: VisualzeBoardArguments, model: HookedTransformer):
+def visualize_game(input_str, vis_args: VisualzeBoardArguments, model: HookedTransformer, cache=None):
     # 1. Get the cache
     # 2. Get Board States from the cache using the Pobes
     # 3. Plot the Board States
     # assert not (vis_args.include_attn_only and vis_args.include_mlp_only)
     if len(input_str) > 59:
         input_str = input_str[:59]
+    if cache is None:
+        _, cache = model.run_with_cache(t.Tensor(to_int(input_str)).to(t.int32))
     label_list = string_to_label(input_str)
-    boards, flip_boards = get_boards(t.Tensor(to_int(input_str)).to(t.int32), vis_args, model)
+    boards, flip_boards = get_boards(cache, vis_args)
     plot_boards(label_list, boards, flip_boards, vis_args)
 
 
@@ -638,11 +650,96 @@ if __name__ == "__main__":
     _, focus_games_str = get_focus_games()
 
     clean_input_str = focus_games_str[0][:30]
-    visualize_game(clean_input_str, vis_args, model)
+    # visualize_game(clean_input_str, vis_args, model)
     '''
     print(label_to_int("B3"))
     print(label_to_string("B3"))
     print(label_to_tuple("B3"))'''
 
+def get_activation(board_seqs_int, act_names, num_games=1000, start=0, games = []):
+    # TODO: If this takes to long or something, Make a filter step!
+    inference_size = 200
+    if len(games) > 0:
+        num_games = len(games)
+    iterate = range(start, start+num_games, inference_size)
+    if num_games > 1000:
+        iterate = tqdm(iterate, total=num_games//inference_size)
+    print("Getting activations ...")
+    act_name_results = {act_name : [] for act_name in act_names}
+    for batch in iterate:
+        input_games = list(range(batch, min(batch + inference_size, batch + num_games)))
+        if len(games) > 0:
+            input_games = [games[i] for i in input_games]
+        with t.inference_mode():
+            _, cache = model.run_with_cache(
+                board_seqs_int[input_games, :-1].to(device),
+                return_type=None,
+                names_filter=lambda name: name in act_names
+                # names_filter=lambda name: name == f"blocks.{layer}.hook_resid_mid" or name == f"blocks.{layer}.mlp.hook_post"
+                # names_filter=lambda name: name == f"blocks.{layer}.hook_resid_pre" or name == f"blocks.{layer}.mlp.hook_post"
+            )
+        for act_name in act_names:
+            act_name_results[act_name] += [cache[act_name].detach().cpu()]
+    for act_name in act_names:
+        act_name_results[act_name] = t.cat(act_name_results[act_name], dim=0)
+        act_name_results[act_name] = act_name_results[act_name][:num_games]
+    return act_name_results
 
+# Create a helper function, where I can say, I want to get the thiese activations for the first ... games
+'''def get_activation(act_names, num_games, start=0):
+    # TODO: If this takes to long or something, Make a filter step!
+    act_name_results = {act_name : [] for act_name in act_names}
+    inference_size = 1000
+    for batch in range(start, start+num_games, inference_size):
+        with t.inference_mode():
+            _, cache = model.run_with_cache(
+                board_seqs_int[batch:batch+inference_size, :-1].to(device),
+                return_type=None,
+                names_filter=lambda name: name in act_names
+                # names_filter=lambda name: name == f"blocks.{layer}.hook_resid_mid" or name == f"blocks.{layer}.mlp.hook_post"
+                # names_filter=lambda name: name == f"blocks.{layer}.hook_resid_pre" or name == f"blocks.{layer}.mlp.hook_post"
+            )
+        for act_name in act_names:
+            act_name_results[act_name] += [cache[act_name]]
+    for act_name in act_names:
+        act_name_results[act_name] = t.cat(act_name_results[act_name], dim=0)
+        act_name_results[act_name] = act_name_results[act_name].detach()[:num_games]
+    return act_name_results'''
+
+def orthogonalize_vector_to_group(a, B, normalize=True):
+    """Orthogonalizes vector a against a list of vectors B without in-place modification using PyTorch"""
+    orthogonal_a = a.clone()  # Create a copy of a to avoid in-place modification
+    B_prev = []
+    for b in B:
+        if not all([b @ b_prev < 1e-6 for b_prev in B_prev]):
+            b = orthogonalize_vector_to_group(b, B_prev)
+        # Project orthogonal_a onto b
+        projection = einops.repeat(einops.einsum(a, b, "... d_model, d_model -> ...") / t.dot(b, b), "... -> ... d_model", d_model = b.shape[0]) * b
+        # Update orthogonal_a by subtracting the projection
+        orthogonal_a = orthogonal_a - projection
+        B_prev += [b]
     
+    # Normalize the resulting vector orthogonal_a
+    if normalize:
+        orthogonal_a = orthogonal_a / t.norm(orthogonal_a)
+    
+    return orthogonal_a
+
+def orthogonalize_vectors(vectors, normalize=True):
+    new_vectors = []
+    for vector in vectors:
+        vector = orthogonalize_vector_to_group(vector, new_vectors)
+        new_vectors += [vector]
+    return new_vectors
+
+
+def plot_neuron_attribution(focus_cache, game_idx, layer, position, direction : Float[Tensor, "d_model"], title_text):
+    W_out : Float[Tensor, "d_mlp d_model"] = model.W_out[layer].detach()
+    activations = focus_cache["post", layer][game_idx]
+    attributions = activations[position] * einops.einsum(W_out, direction, "d_mlp d_d_model, d_model -> d_mlp")
+    print(attributions.shape)
+    # Make a plotly scatter plot. y axis is the attribution, x axis is the neuron index
+    fig = px.scatter(x=list(range(attributions.shape[0])), y=attributions.cpu().numpy().flatten(), labels={"x": "Neuron Index", "y": "Attribution"})
+    fig.update_layout(title_text=title_text)
+    fig.update_yaxes(exponentformat = 'E')
+    fig.show()

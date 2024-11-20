@@ -222,3 +222,97 @@ def get_similiarity(neuron : Int, layer : Int, tiles : List[Tuple[str, str, str,
         return avg_similiarity / len(tiles)
     else:
         return similiarity_all
+
+def plot_neuron_weights(neurons : Float[Tensor, "d_mlp"], layer : Int, title : str, probe_names_and_directions : Dict[str, List[str]] = probe_directions_list, save=False):
+    direction_dict = defaultdict(list)
+    for neuron in neurons:
+        neuron = neuron.item()
+        for in_out in ["in", "out"]:
+            for probe_name in probe_names_and_directions:
+                for direction_str in probe_names_and_directions[probe_name]:
+                    if in_out == "in":
+                        # probe_module = "mid"
+                        probe_module = "post"
+                        probe = get_probe(layer = layer, probe_type = probe_name, probe_module = probe_module).clone()
+                    else:
+                        probe_module = "post"
+                        probe = get_probe(layer = layer, probe_type = probe_name, probe_module = probe_module).clone()
+                    if probe.isnan().sum().item() > 0:
+                        print(f"Probe {probe_name} in is nan")
+                        continue
+                    probe_normalized = probe / probe.norm(dim=1, keepdim=True)
+                    direction_int = probe_directions[probe_name][direction_str]
+                    if in_out == "in":
+                        neuron_weights = calculate_neuron_input_weights(model, probe_normalized, layer, neuron, direction_int)
+                    else:
+                        neuron_weights = calculate_neuron_output_weights(model, probe_normalized, layer, neuron, direction_int)
+                    direction_dict[f"{get_short_cut(probe_name)}_{get_short_cut(direction_str)}_{in_out}"].append(neuron_weights)
+
+    for direction, weights in direction_dict.items():
+        direction_dict[direction] = t.stack(weights)
+
+    boards = t.stack(list(direction_dict.values()))
+    plot_boards_general(
+        x_labels = list(direction_dict.keys()),
+        y_labels = [f"N{i.item()}" for i in neurons],
+        boards = boards,
+        title_text = title,
+        save=save,
+    )
+
+def get_max_acitvations_of_neuron(
+    cache: ActivationCache,
+    layer: int,
+    neuron: int,
+    num_activations: int = 10,
+    random = False,
+) -> Tuple[Float[Tensor, "game move"], Float[Tensor, "game move"]]:
+    '''
+    Returns the top activations for a given neuron in a given layer.
+    '''
+    # SOLUTION
+    post_activations = cache["post", layer][:, :, neuron]
+    batch_size, seq_len = post_activations.shape
+    post_activations = post_activations.reshape(-1)
+    top_activations = post_activations.argsort(descending=True)
+    activation_values = post_activations.sort(descending=True)
+    # set positive_activations to num_activation random examples
+    if random:
+        positive_count = (activation_values.values > 0).sum()
+        positive_activations = top_activations[:positive_count]
+        random_indeces = (t.randperm(positive_count)[:num_activations]).to(t.long)
+        top_activations = positive_activations[random_indeces]
+    else:
+        top_activations = top_activations[:num_activations]
+    activation_values = post_activations[top_activations]
+    top_games = top_activations // seq_len
+    top_moves = top_activations % seq_len
+    print(f"Top Game: \n{top_games}")
+    print(f"Top Move: \n{top_moves}")
+    print(f"Activation values: \n{activation_values}")
+    return top_games, top_moves, activation_values
+
+def plot_max_activations_of_neuron(focus_cache: ActivationCache, focus_games_string, layer: int, neuron: int, random=False, how_many=8):
+    top_games, top_moves, activation_values = get_max_acitvations_of_neuron(focus_cache, layer, neuron, how_many, random=random)
+    for i in range(len(top_games)):
+        game = top_games[i].item()
+        pos = top_moves[i].item()
+        activation = activation_values[i].item()
+        vis_args = VisualzeBoardArguments()
+        vis_args.start_pos = pos
+        vis_args.end_pos = pos+1
+        # vis_args.include_layer_norm = True
+        # vis_args.include_pre_resid = False
+        vis_args.layers = 6
+        vis_args.static_image = False
+        vis_args.include_resid_post = False
+        vis_args.include_layer_norm = True
+        # vis_args.include_attn_only = True
+        # vis_args.include_mlp_only = True
+        # plot_game(focus_games_string, game)
+        print(f"Game: {game}, Pos: {pos}, Activation: {activation}")
+        visualize_game(
+            focus_games_string[game, :59],
+            vis_args,
+            model,
+        )
