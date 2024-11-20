@@ -3,8 +3,5 @@ wandb
 slurm
 other
 __pycache__
-neuron_predictors
-saes
+old
 checkpoints
-mats_experiments/checkpoints
-mats_experiments/sparse_autoencoder.pt
