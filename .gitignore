@@ -5,3 +5,5 @@ other
 __pycache__
 old
 checkpoints
+flipping_circuit_saves
+flipping_circuit_results
