@@ -1,0 +1,24 @@
+[project]
+name = "flipping-circuit-review"
+version = "0.1.0"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "torch>=2.3",
+    "transformer-lens>=2.0,<3",
+    "transformers>=4.40,<4.50",
+    "einops",
+    "numpy",
+    "huggingface-hub",
+    "matplotlib",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
