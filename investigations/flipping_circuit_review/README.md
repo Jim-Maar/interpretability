@@ -55,7 +55,7 @@ This has two consequences:
 - **Classification.** The mean activation of a neuron "on a rule" is averaged over the right positions but mostly over the wrong games. Only the first batch of 500 out of 10,000 games is correct, so the rule signal is diluted about 20 times and replaced by the neuron's average activation at those positions. `check_example_neuron.py` shows this for the neuron from the post. On its own rule (C2 yours, D3 mine, then a tile placed at E4, F5, G6 or H7), L1N1411's mean activation is 2.09 when indexed correctly, the highest of all 2048 layer-1 neurons. The original code computes 0.13 instead, which is below the 0.17 cutoff. So the original circuit drops L1N1411 for this rule and keeps 12 other neurons.
 - **Evaluation.** Validation rule hits are stored the same way. So when the evaluation loop asks for the rules of game *e*, it gets the union of the rules of all 20 games that share *e*'s index modulo 500.
 
-This also explains why the hand check of L1N1411 passed. That check ran in `DEBUG` mode, with 500 training games in batches of 50. There the bug mixes only 10 batches, and the diluted value is 0.29, which still passes 0.17 (`check_debug_scale.py`). At the full scale of 20 batches it drops to 0.13 and fails.
+This probably explains why the hand check of L1N1411 passed. I am inferring that it ran with the script's `DEBUG` settings, which use 500 training games in batches of 50. There the bug mixes only 10 batches, and the diluted value is 0.29, which still passes 0.17 (`check_debug_scale.py`). At the full scale of 20 batches it drops to 0.13 and fails.
 
 The effect on the result is large. With the original logic, the circuit is no better than the random control:
 
