@@ -10,7 +10,6 @@ from common import (
     FEATURE_TO_PROBE_OPTION,
     FLIPPED,
     MINE,
-    N_LAYERS,
     PLACED,
     YOURS,
     EMPTY,
@@ -24,7 +23,7 @@ from common import (
     probe_argmax,
     run_with_cache,
 )
-from othello import BLACK, WHITE, game_labels, initial_board, legal_moves, tiles_flipped_by
+from othello import BLACK, game_labels, initial_board, legal_moves, tiles_flipped_by
 
 NUM_CHECK_GAMES = 200
 
@@ -126,7 +125,7 @@ def check_rule_evaluator(cache, probes_post):
     fast = RuleEvaluator(rules)(readout)
     slow = t.stack([original_rule_loop(readout, rule, 50) for rule in rules.values()], dim=-1)
     print(f"\nRules: {len(rules)}. Fast evaluator agrees with the original loop: {bool((fast == slow).all())}")
-    print(f"Rules true per (game, layer, pos), mean over layers 0..7: "
+    print("Rules true per (game, layer, pos), mean over layers 0..7: "
           + " ".join(f"{x:.2f}" for x in fast.sum(-1).float().mean(dim=(0, 2)).tolist()))
 
 

@@ -168,31 +168,18 @@ def get_all_rules() -> dict[str, list[list[str]]]:
 
 
 class RuleEvaluator:
-    """Evaluates all rules at once on probe read-outs.
+    """Evaluates all rules on probe read-outs.
 
-    The original `get_games_positions_layers_that_follow_rule` loops over rules and literals.
-    This class computes the same boolean, but as one gather over a table of literals, so that
-    it is fast enough to run on a CPU. `test_rule_evaluator.py` checks that both agree.
+    This computes the same boolean as the original `get_games_positions_layers_that_follow_rule`,
+    but compares each (tile, feature) literal only once and reuses it across rules.
+    `sanity_checks.py` checks that both agree.
     """
-
-    def __init__(self, rules: dict[str, list[list[str]]]):
-        conjunctions, conjunction_rule = [], []
-        for rule_index, rule in enumerate(rules.values()):
-            for conjunction in rule:
-                conjunctions.append([self.literal_index(literal) for literal in conjunction])
-                conjunction_rule.append(rule_index)
-        max_length = max(len(c) for c in conjunctions)
-        always_true = self.num_literals()
-        self.conjunction_literals = t.tensor([c + [always_true] * (max_length - len(c)) for c in conjunctions])
-        self.conjunction_to_rule = t.zeros(len(conjunctions), len(rules))
-        self.conjunction_to_rule[t.arange(len(conjunctions)), t.tensor(conjunction_rule)] = 1.0
-        self.num_rules = len(rules)
 
     FEATURES = list(FEATURE_TO_PROBE_OPTION)
 
-    @classmethod
-    def num_literals(cls) -> int:
-        return 64 * len(cls.FEATURES)
+    def __init__(self, rules: dict[str, list[list[str]]]):
+        self.rules = [[[self.literal_index(literal) for literal in conjunction] for conjunction in rule] for rule in rules.values()]
+        self.num_rules = len(self.rules)
 
     @classmethod
     def literal_index(cls, literal: str) -> int:
@@ -202,24 +189,26 @@ class RuleEvaluator:
 
     @classmethod
     def literal_table(cls, probe_argmax: dict[str, t.Tensor]) -> t.Tensor:
-        """probe_argmax: {probe_name: [..., 8, 8]} -> bool [..., num_literals + 1]."""
+        """probe_argmax: {probe_name: [..., 8, 8]} -> bool [num_literals, ...]."""
         columns = []
         for feature in cls.FEATURES:
             probe_name, option = FEATURE_TO_PROBE_OPTION[feature]
-            columns.append((probe_argmax[probe_name] == option).flatten(-2))
-        table = t.cat(columns, dim=-1)
-        always_true = t.ones(*table.shape[:-1], 1, dtype=t.bool)
-        return t.cat([table, always_true], dim=-1)
+            columns.append((probe_argmax[probe_name] == option).flatten(-2).movedim(-1, 0))
+        return t.cat(columns).contiguous()
 
-    def __call__(self, probe_argmax: dict[str, t.Tensor], chunk_size: int = 512) -> t.Tensor:
+    def __call__(self, probe_argmax: dict[str, t.Tensor]) -> t.Tensor:
         """Returns bool [..., num_rules]: which rules are true at each position."""
         table = self.literal_table(probe_argmax)
-        rule_counts = t.zeros(*table.shape[:-1], self.num_rules)
-        for start in range(0, len(self.conjunction_literals), chunk_size):
-            literals = self.conjunction_literals[start : start + chunk_size]
-            conjunction_true = table[..., literals].all(dim=-1).float()
-            rule_counts += conjunction_true @ self.conjunction_to_rule[start : start + chunk_size]
-        return rule_counts > 0
+        results = []
+        for rule in self.rules:
+            rule_true = t.zeros_like(table[0])
+            for conjunction in rule:
+                conjunction_true = table[conjunction[0]].clone()
+                for literal in conjunction[1:]:
+                    conjunction_true &= table[literal]
+                rule_true |= conjunction_true
+            results.append(rule_true)
+        return t.stack(results, dim=-1)
 
 
 def probe_argmax(resid: t.Tensor, probes: dict[str, t.Tensor]) -> dict[str, t.Tensor]:

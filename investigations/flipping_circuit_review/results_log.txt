@@ -1,0 +1,12 @@
+[02:34:04] Phase 1: mean activations, rule detection and neuron statistics
+[02:34:04]   loaded cache_mean_mlp_post.pt
+[02:34:04]   loaded cache_training_scan.pt
+[02:34:04]   loaded cache_original_statistics.pt
+[02:34:05]   loaded cache_valid_rules.pt
+[02:34:05] Phase 2: classify neurons
+[02:34:06] Phase 3: evaluate
+[02:38:59]   evaluated games up to 500
+[02:43:49]   evaluated games up to 1000
+[02:48:44]   evaluated games up to 1500
+[02:53:26]   evaluated games up to 2000
+[02:53:26] Done

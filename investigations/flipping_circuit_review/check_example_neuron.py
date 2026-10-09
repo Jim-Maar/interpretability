@@ -22,7 +22,7 @@ def main():
     for config in CONFIGS:
         saved = t.load(RESULTS_DIR / f"classification_{config.name}.pt")
         kept = saved["kept"][EXAMPLE_LAYER, rule_index]
-        mean_on_rule = saved["approx"][EXAMPLE_LAYER, rule_index, EXAMPLE_NEURON].item()
+        mean_on_rule = saved["mean_on_rule"][EXAMPLE_LAYER, rule_index, EXAMPLE_NEURON].item()
         difference = saved["difference"][EXAMPLE_LAYER, rule_index, EXAMPLE_NEURON].item()
         samples = saved["counts_per_pos"][EXAMPLE_LAYER, rule_index].sum().item()
         rank = (saved["difference"][EXAMPLE_LAYER, rule_index] > difference).sum().item() + 1

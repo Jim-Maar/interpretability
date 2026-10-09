@@ -57,7 +57,9 @@ RULE_INPUTS = ["post_probe_on_ln2", "mid_probe_on_resid_mid"]
 class Config:
     name: str
     index_bug: bool
-    select_on: str  # "activation" (original code) or "difference" (as described in the post)
+    # "activation" (original code), "difference" (as described in the thesis), or
+    # "absolute_difference" (also keeps neurons that switch off when the rule is true)
+    select_on: str
     difference_reference: str  # "all_positions" (original) or "same_position"
     rule_input: str
 
@@ -68,6 +70,7 @@ CONFIGS = [
     Config("fix_index_select_on_difference", False, "difference", "all_positions", "post_probe_on_ln2"),
     Config("fix_index_difference_same_position", False, "difference", "same_position", "post_probe_on_ln2"),
     Config("all_fixes_mid_probes", False, "difference", "same_position", "mid_probe_on_resid_mid"),
+    Config("fix_index_absolute_difference_same_position", False, "absolute_difference", "same_position", "post_probe_on_ln2"),
 ]
 
 
@@ -105,16 +108,21 @@ def rule_inputs_from_cache(cache, probes_post, probes_mid) -> dict[str, dict[str
     }
 
 
+def rule_rows(evaluator, readout, first_game: int) -> t.Tensor:
+    """int32 rows (game, layer, pos, rule) where the rule is true."""
+    rows = evaluator(readout).nonzero().to(t.int32)
+    rows[:, 0] += first_game
+    return rows
+
+
 def collect_rule_rows(model, tokens, num_games, evaluator, probes_post, probes_mid) -> dict[str, t.Tensor]:
-    """For every rule input, returns int32 rows (game, layer, pos, rule) where the rule is true."""
+    """For every rule input, the rows (game, layer, pos, rule) where the rule is true."""
     rows = {rule_input: [] for rule_input in RULE_INPUTS}
     for start, stop in batches(0, num_games):
         cache = run_with_cache(model, tokens[start:stop], ["ln2.hook_normalized", "hook_resid_mid"])
         for rule_input, readout in rule_inputs_from_cache(cache, probes_post, probes_mid).items():
-            batch_rows = evaluator(readout).nonzero().to(t.int32)
-            batch_rows[:, 0] += start
-            rows[rule_input].append(batch_rows)
-        if start % 2000 == 0:
+            rows[rule_input].append(rule_rows(evaluator, readout, start))
+        if stop % 2000 == 0:
             log(f"  rules collected for games up to {stop}")
     return {rule_input: t.cat(parts) for rule_input, parts in rows.items()}
 
@@ -133,44 +141,74 @@ def original_recorded_game(game: t.Tensor) -> t.Tensor:
     return game % ORIGINAL_BATCH_SIZE
 
 
-def accumulate_rule_statistics(model, tokens, rows: t.Tensor, index_bug: bool, num_rules: int):
-    """Sums of mlp.hook_post over the (game, pos) samples assigned to each (layer, rule).
+class RuleStatistics:
+    """Sums of mlp.hook_post over the (game, pos) samples assigned to each (layer, rule)."""
 
-    Returns (sums [layer, rule, neuron], counts_per_pos [layer, rule, pos]).
-    With index_bug, the activations are read from the recorded game (g mod 500), as in the original.
+    def __init__(self, num_rules: int):
+        self.num_rules = num_rules
+        self.sums = t.zeros(N_LAYERS, num_rules, D_MLP)
+        self.counts_per_pos = t.zeros(N_LAYERS, num_rules, N_POS)
+
+    def add(self, rows: t.Tensor, mlp_post: t.Tensor, first_game: int):
+        """rows must only contain games first_game .. first_game + len(mlp_post)."""
+        game, layer, pos, rule = rows.long().unbind(dim=1)
+        self.counts_per_pos.index_put_((layer, rule, pos), t.ones(len(rows)), accumulate=True)
+        values = mlp_post[game - first_game, layer, pos]
+        self.sums.view(-1, D_MLP).index_add_(0, layer * self.num_rules + rule, values)
+
+
+def scan_training_games(model, tokens, evaluator, probes_post, probes_mid):
+    """One pass over the training games. Detects rules and accumulates correctly indexed statistics.
+
+    Returns (rows per rule input, RuleStatistics per rule input).
     """
-    sums = t.zeros(N_LAYERS, num_rules, D_MLP)
-    counts_per_pos = t.zeros(N_LAYERS, num_rules, N_POS)
-    game, layer, pos, rule = rows.long().unbind(dim=1)
-    if index_bug:
-        game = original_recorded_game(game)
-    counts_per_pos.index_put_((layer, rule, pos), t.ones(len(rows)), accumulate=True)
-    activation_games = ORIGINAL_BATCH_SIZE if index_bug else NUM_GAMES_TRAIN
-    for start, stop in batches(0, activation_games):
+    rows = {rule_input: [] for rule_input in RULE_INPUTS}
+    statistics = {rule_input: RuleStatistics(evaluator.num_rules) for rule_input in RULE_INPUTS}
+    hooks = ["ln2.hook_normalized", "hook_resid_mid", "mlp.hook_post"]
+    for start, stop in batches(0, NUM_GAMES_TRAIN):
+        cache = run_with_cache(model, tokens[start:stop], hooks)
+        for rule_input, readout in rule_inputs_from_cache(cache, probes_post, probes_mid).items():
+            batch_rows = rule_rows(evaluator, readout, start)
+            rows[rule_input].append(batch_rows)
+            statistics[rule_input].add(batch_rows, cache["mlp.hook_post"], start)
+        if stop % 2000 == 0:
+            log(f"  training games scanned up to {stop}")
+    return {rule_input: t.cat(parts) for rule_input, parts in rows.items()}, statistics
+
+
+def original_statistics(model, tokens, rows: t.Tensor, num_rules: int) -> RuleStatistics:
+    """Statistics as the original computes them: each rule hit in game g reads game g mod 500."""
+    recorded = rows.clone()
+    recorded[:, 0] = original_recorded_game(recorded[:, 0])
+    statistics = RuleStatistics(num_rules)
+    for start, stop in batches(0, ORIGINAL_BATCH_SIZE):
         mlp_post = run_with_cache(model, tokens[start:stop], ["mlp.hook_post"])["mlp.hook_post"]
-        in_batch = (game >= start) & (game < stop)
-        values = mlp_post[game[in_batch] - start, layer[in_batch], pos[in_batch]]
-        flat_index = layer[in_batch] * num_rules + rule[in_batch]
-        sums.view(-1, D_MLP).index_add_(0, flat_index, values)
-    return sums, counts_per_pos
+        in_batch = (recorded[:, 0] >= start) & (recorded[:, 0] < stop)
+        statistics.add(recorded[in_batch], mlp_post, start)
+    return statistics
 
 
-def select_neurons(sums, counts_per_pos, mean_mlp_post, config: Config):
-    """Returns (kept [layer, rule, neuron] bool, approx [layer, rule, neuron]).
+def select_neurons(statistics: RuleStatistics, mean_mlp_post, config: Config):
+    """Returns (kept, mean_on_rule, difference), each [layer, rule, neuron].
 
-    `approx` is the mean activation on the rule's positive samples, which the original uses to
+    `mean_on_rule` is the mean activation on the rule's positive samples, which the original uses to
     replace the kept neurons' activations in the "approximated neuron activations" variant.
     """
+    counts_per_pos = statistics.counts_per_pos
     counts = counts_per_pos.sum(dim=-1)
     has_samples = counts > 0
-    mean_on_rule = sums / counts.clamp(min=1)[..., None]
+    mean_on_rule = statistics.sums / counts.clamp(min=1)[..., None]
     if config.difference_reference == "all_positions":
         reference = mean_mlp_post.mean(dim=1)[:, None, :]
     else:
         expected_sum = t.einsum("lrp,lpn->lrn", counts_per_pos, mean_mlp_post)
         reference = expected_sum / counts.clamp(min=1)[..., None]
     difference = mean_on_rule - reference
-    score = mean_on_rule if config.select_on == "activation" else difference
+    score = {
+        "activation": mean_on_rule,
+        "difference": difference,
+        "absolute_difference": difference.abs(),
+    }[config.select_on]
     kept = (score >= NEURON_THRESHOLD) & has_samples[..., None]
     return kept, mean_on_rule, difference
 
@@ -247,6 +285,7 @@ class Scores:
         self.mlp_flip_recovered, self.mlp_flip_count = zeros(), zeros()
         self.no_flip_kept, self.no_flip_count = zeros(), zeros()
         self.abs_error, self.abs_error_baseline = zeros(), zeros()
+        self.abs_error_on_flips, self.abs_error_baseline_on_flips = zeros(), zeros()
         self.neurons_kept, self.positions_with_neurons = t.zeros(N_LAYERS, N_POS), t.zeros(N_LAYERS, N_POS)
 
     @staticmethod
@@ -268,6 +307,7 @@ class Scores:
             "no_flip_specificity": ratio(self.no_flip_kept, self.no_flip_count),
             "mlp_flip_count": self.mlp_flip_count.tolist(),
             "effect_recovered": (1 - self.abs_error / self.abs_error_baseline).tolist(),
+            "effect_recovered_on_mlp_flips": (1 - self.abs_error_on_flips / self.abs_error_baseline_on_flips).tolist(),
             "avg_neurons_kept": t.nanmean(per_position_count, dim=1).tolist(),
         }
 
@@ -343,9 +383,14 @@ def score_prediction(scores: Scores, readout: LayerReadout, pred_mlp_post: t.Ten
 
     # Cleaner metric 2: how much of the MLP's effect on the flipped logit difference is recovered,
     # relative to mean-ablating the whole layer. 1 means perfect, 0 means as bad as full ablation.
+    # We report it over all tiles and over only the tiles where the MLP changes the decision.
     pred_diff = LayerReadout.logit_diff(readout.logits(pred_mlp_out))
-    scores.abs_error += Scores.by_region((pred_diff - readout.real_mlp_logit_diff).abs())
-    scores.abs_error_baseline += Scores.by_region((readout.baseline_mlp_logit_diff - readout.real_mlp_logit_diff).abs())
+    abs_error = (pred_diff - readout.real_mlp_logit_diff).abs()
+    abs_error_baseline = (readout.baseline_mlp_logit_diff - readout.real_mlp_logit_diff).abs()
+    scores.abs_error += Scores.by_region(abs_error)
+    scores.abs_error_baseline += Scores.by_region(abs_error_baseline)
+    scores.abs_error_on_flips += Scores.by_region(abs_error * mlp_flips)
+    scores.abs_error_baseline_on_flips += Scores.by_region(abs_error_baseline * mlp_flips)
 
 
 def count_kept_neurons(scores: Scores, kept_mask: t.Tensor):
@@ -400,6 +445,17 @@ def classification_summary(kept: t.Tensor, counts_per_pos: t.Tensor) -> dict:
     }
 
 
+def cached(name: str, compute):
+    """Loads a phase's output from results/ if an earlier run saved it, otherwise computes and saves it."""
+    path = RESULTS_DIR / f"cache_{name}.pt"
+    if path.exists():
+        log(f"  loaded {path.name}")
+        return t.load(path, weights_only=False)
+    value = compute()
+    t.save(value, path)
+    return value
+
+
 def main():
     t.set_grad_enabled(False)
     RESULTS_DIR.mkdir(exist_ok=True)
@@ -409,31 +465,33 @@ def main():
     evaluator = RuleEvaluator(rules)
     train_tokens, valid_tokens = load_tokens("train"), load_tokens("valid")
 
-    log("Phase 1: mean activations and rule detection")
-    mean_mlp_post = compute_mean_mlp_post(model, train_tokens)
-    train_rows = collect_rule_rows(model, train_tokens, NUM_GAMES_TRAIN, evaluator, probes_post, probes_mid)
-    valid_rows = collect_rule_rows(model, valid_tokens, NUM_GAMES_VALID, evaluator, probes_post, probes_mid)
+    log("Phase 1: mean activations, rule detection and neuron statistics")
+    mean_mlp_post = cached("mean_mlp_post", lambda: compute_mean_mlp_post(model, train_tokens))
+    train_rows, statistics = cached(
+        "training_scan", lambda: scan_training_games(model, train_tokens, evaluator, probes_post, probes_mid)
+    )
+    buggy_statistics = cached(
+        "original_statistics",
+        lambda: original_statistics(model, train_tokens, train_rows["post_probe_on_ln2"], len(rules)),
+    )
+    valid_rows = cached(
+        "valid_rules",
+        lambda: collect_rule_rows(model, valid_tokens, NUM_GAMES_VALID, evaluator, probes_post, probes_mid),
+    )
 
     log("Phase 2: classify neurons")
-    statistics = {}
-    for rule_input in RULE_INPUTS:
-        for index_bug in [True, False]:
-            if index_bug and rule_input != "post_probe_on_ln2":
-                continue
-            log(f"  rule input {rule_input}, index bug {index_bug}")
-            statistics[(rule_input, index_bug)] = accumulate_rule_statistics(
-                model, train_tokens, train_rows[rule_input], index_bug, len(rules)
-            )
-
     circuits, classification = {}, {}
     for config in CONFIGS:
-        sums, counts_per_pos = statistics[(config.rule_input, config.index_bug)]
-        kept, approx, difference = select_neurons(sums, counts_per_pos, mean_mlp_post, config)
+        config_statistics = buggy_statistics if config.index_bug else statistics[config.rule_input]
+        kept, mean_on_rule, difference = select_neurons(config_statistics, mean_mlp_post, config)
         rows = eval_rule_rows(valid_rows[config.rule_input], config.index_bug)
-        circuits[config.name] = (config, rows, kept, approx)
-        classification[config.name] = classification_summary(kept, counts_per_pos)
-        t.save({"kept": kept, "approx": approx, "difference": difference, "counts_per_pos": counts_per_pos},
-               RESULTS_DIR / f"classification_{config.name}.pt")
+        circuits[config.name] = (config, rows, kept, mean_on_rule)
+        classification[config.name] = classification_summary(kept, config_statistics.counts_per_pos)
+        t.save(
+            {"kept": kept, "mean_on_rule": mean_on_rule, "difference": difference,
+             "counts_per_pos": config_statistics.counts_per_pos},
+            RESULTS_DIR / f"classification_{config.name}.pt",
+        )
 
     log("Phase 3: evaluate")
     scores = evaluate(model, valid_tokens, mean_mlp_post, probes_post["flipped"], circuits, len(rules))
